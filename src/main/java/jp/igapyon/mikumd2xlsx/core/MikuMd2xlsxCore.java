@@ -1,7 +1,7 @@
 package jp.igapyon.mikumd2xlsx.core;
 
 public class MikuMd2xlsxCore {
-    public static final String VERSION = "0.1.0.1";
+    public static final String VERSION = "0.5.0";
 
     public WorkbookModel markdownToXlsxModel(String markdown) {
         return markdownToXlsxModel(markdown, new Md2XlsxOptions());
@@ -23,4 +23,3 @@ public class MikuMd2xlsxCore {
         return workbookModelToXlsx(markdownToXlsxModel(markdown, options));
     }
 }
-

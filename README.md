@@ -1,23 +1,61 @@
 # miku-md2xlsx-java
 
-Java straight-conversion runtime and CLI for
-[miku-md2xlsx](https://github.com/igapyon/miku-md2xlsx).
+`miku-md2xlsx-java` converts Markdown files to Excel `.xlsx` workbooks from a
+local Java command line.
 
-This repository currently contains the initial Java runtime skeleton. It can
-read Markdown from disk and write a basic `.xlsx` workbook. The first conversion
-slice covers headings, paragraphs, lists, fenced code blocks, horizontal rules,
-and GitHub-style Markdown tables. Advanced upstream behavior such as embedded
-images, rich text runs, hyperlinks, merge markers, column hints, and semantic
-roundtrip parity is tracked as follow-up work.
+This is the Java straight-conversion runtime for
+[miku-md2xlsx](https://github.com/igapyon/miku-md2xlsx). It is intended for
+local conversion, build automation, and Java-centered environments where a
+single executable jar is easier to use than the Node.js CLI.
 
-## Usage
+## What It Converts
+
+The current Java runtime supports the following Markdown features:
+
+- headings, paragraphs, lists, fenced code blocks, and horizontal rules
+- GitHub-style Markdown tables
+- local PNG/JPEG/GIF image references, resolved relative to the input Markdown
+  file
+- common inline styles: bold, italic, strike, underline, and line breaks
+- external hyperlinks and internal `Sheet!A1`-style links
+- miku-xlsx2md merge markers: `[←M←]` and `[↑M↑]`
+- worksheet column width hints
+
+The generated workbook is a basic `.xlsx` file. Java-side tests cover
+representative upstream fixture semantics, image sizing, drawings, hyperlinks,
+merges, styles, and generated workbook XML. Exact Markdown AST compatibility
+with upstream `remark-parse` plus `remark-gfm` remains a migration follow-up
+item.
+
+## Requirements
+
+- Java runtime for running the jar
+- Maven for building from source
+
+The project source and target compatibility are fixed to Java 1.8.
+
+## Quick Start
 
 ```sh
 mvn package
-java -jar target/miku-md2xlsx-java-0.1.0.1.jar README.md --out README.xlsx
+java -jar target/miku-md2xlsx-java-0.5.0.jar README.md --out README.xlsx
 ```
 
-Options:
+## Command Form
+
+```sh
+java -jar target/miku-md2xlsx-java-0.5.0.jar <input.md> --out <output.xlsx> [options]
+```
+
+Examples:
+
+```sh
+java -jar target/miku-md2xlsx-java-0.5.0.jar sample.md --out sample.xlsx
+java -jar target/miku-md2xlsx-java-0.5.0.jar book.md --out book.xlsx --sheet-mode heading
+java -jar target/miku-md2xlsx-java-0.5.0.jar book.md --out book.xlsx --sheet-mode heading --sheet-heading-depth 2
+```
+
+## Options
 
 - `--out <file>`: output `.xlsx` path
 - `--sheet-mode <mode>`: `single` or `heading`
@@ -28,6 +66,26 @@ Options:
 - `--help`: show help
 - `--version`: show version
 
+## Sheet Modes
+
+- `single`: create one worksheet from the whole Markdown file.
+- `heading`: split worksheets at headings that match `--sheet-heading-depth`.
+
+Use `--sheet-heading-depth 2` for miku-xlsx2md-style Markdown where the first
+level heading is the workbook title and second level headings represent
+worksheets.
+
+## Notes
+
+- Local images are embedded when the referenced files exist next to the input
+  Markdown path or under a relative subdirectory.
+- Remote image URLs are not downloaded.
+- Markdown table cell values are written as strings. Numeric-looking and
+  date-like Markdown text is not inferred as Excel numbers or dates.
+- `--table-style plain` keeps table body cells visually plain while preserving
+  header styling unless `--no-header-row` is also specified.
+- Byte-level parity with the Node.js runtime is not expected at this stage.
+
 ## Development
 
 ```sh
@@ -35,7 +93,11 @@ mvn test
 mvn package
 ```
 
-This repository follows the miku-soft Java straight-conversion conventions:
+Release assets are built by `.github/workflows/release-cli-runtime.yml` for
+`v*` tags or manual workflow dispatch. The workflow uploads the executable jar,
+sources jar, and dist zip to the matching GitHub Release.
+
+Repository conventions:
 
 - Java source and target compatibility are fixed to `1.8`.
 - Maven is the build tool.
@@ -44,4 +106,3 @@ This repository follows the miku-soft Java straight-conversion conventions:
 - `.mvn/jvm.config` is tracked for repository-local Maven JVM settings.
 
 See `docs/` for upstream snapshot, mapping, and migration status documents.
-
