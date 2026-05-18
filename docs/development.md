@@ -1,0 +1,33 @@
+# Development
+
+## Checked References
+
+- miku-soft developer skill: local installed skill checked on 2026-05-18.
+- Main workflow: `references/30-java-straight-conversion-workflow.md`.
+- Upstream Node repository: `https://github.com/igapyon/miku-md2xlsx`.
+- Same-layer sister reference: `https://github.com/igapyon/miku-md2docx-java`.
+
+## Sister Reference Decisions
+
+`miku-md2docx-java` was used as the same-layer Java companion reference. The
+following repository-shape decisions were adopted:
+
+- single-module Maven runtime
+- `jp.igapyon.miku...` base package
+- thin CLI class with `run(String[], PrintStream, PrintStream)`
+- root `pom.xml` with Java 1.8, JUnit Jupiter, source jar, shaded jar, and dist zip
+- `docs/` mapping documents and `TODO.md`
+- `workplace/.gitkeep` as the only tracked `workplace/` file
+
+The DOCX-specific package builder and image summary API were not copied because
+this repository's upstream target is an XLSX generator with different Open XML
+parts.
+
+## Commands
+
+```sh
+mvn test
+mvn package
+java -jar target/miku-md2xlsx-java-0.1.0.1.jar README.md --out README.xlsx
+```
+
