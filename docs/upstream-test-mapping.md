@@ -29,6 +29,7 @@
 | Narrative, display format, and formula fixtures | `MikuMd2xlsxCoreTest.convertsUpstreamContentCompatibilityFixtures` | Covered |
 | Cross-sheet formula, named range, and edge fixtures | `MikuMd2xlsxCoreTest.convertsUpstreamMultiSheetMetadataFixtures` | Representative coverage |
 | Chart metadata and dense table fixtures | `MikuMd2xlsxCoreTest.convertsUpstreamChartAndDenseTableMetadataFixtures` | Representative coverage |
+| Unsupported formula/chart/shape native reconstruction boundary | `MikuMd2xlsxCoreTest.keepsUnsupportedFormulaChartAndShapeMetadataAsTextOnly` | Covered |
 | Column hint output | `MikuMd2xlsxCoreTest.computesColumnHintsForTextAndTableRows` | Covered |
 | Empty column hints in worksheet output | `MikuMd2xlsxCoreTest.keepsWorksheetColumnsEmptyWhenColumnHintsAreEmptyLikeUpstream` | Covered |
 | `tableStyle: plain` body-cell role | `MikuMd2xlsxCoreTest.appliesPlainTableStyleToBodyCells` | Covered |
@@ -44,10 +45,12 @@
 | Blank row before heading | `MikuMd2xlsxCoreTest.insertsBlankBeforeHeadingAfterText` | Covered |
 | List marker and nesting | `MikuMd2xlsxCoreTest.preservesListMarkersAndNestedDepth` | Covered |
 | List lazy continuation | `MikuMd2xlsxCoreTest.parsesListLazyContinuationLikeRemarkParse` | Covered |
+| Link definition blocks | `MikuMd2xlsxCoreTest.skipsLinkDefinitionsLikeRemarkParse` | Covered |
 | GFM task list checkbox text | `MikuMd2xlsxCoreTest.stripsGfmTaskListCheckboxesLikeRemarkGfm` | Covered |
 | Spaced thematic breaks | `MikuMd2xlsxCoreTest.parsesSpacedThematicBreaksLikeRemarkParse` | Covered |
 | Blockquote row conversion | `MikuMd2xlsxCoreTest.convertsBlockquoteLinesToQuotedParagraph` | Covered |
 | Blockquote lazy continuation | `MikuMd2xlsxCoreTest.parsesBlockquoteLazyContinuationLikeRemarkParse` | Covered |
+| HTML block raw text | `MikuMd2xlsxCoreTest.keepsHtmlBlocksRawLikeRemarkParse` | Covered |
 | Setext heading parsing | `MikuMd2xlsxCoreTest.parsesSetextHeadingsLikeRemarkParse` | Covered |
 | ATX heading closing sequence parsing | `MikuMd2xlsxCoreTest.stripsAtxClosingHeadingSequenceLikeRemarkParse` | Covered |
 | Tilde fenced code parsing | `MikuMd2xlsxCoreTest.parsesTildeFencedCodeLikeRemarkParse` | Covered |
@@ -61,6 +64,8 @@
 | Image text extraction with empty URL | `MikuMd2xlsxCoreTest.usesAltTextForImagesWithoutUrlLikeUpstreamExtractText` | Covered |
 | Link text extraction with empty URL | `MikuMd2xlsxCoreTest.usesLabelTextForLinksWithoutUrlLikeUpstreamExtractText` | Covered |
 | Link text extraction when label equals URL | `MikuMd2xlsxCoreTest.usesLabelTextForLinksWhenLabelEqualsUrlLikeUpstreamExtractText` | Covered |
+| Reference link label extraction | `MikuMd2xlsxCoreTest.extractsReferenceLinkLabelsLikeUpstreamExtractText` | Covered |
+| Shortcut reference link label extraction | `MikuMd2xlsxCoreTest.extractsShortcutReferenceLinkLabelsWhenDefinitionExistsLikeRemarkParse` | Covered |
 | Inline markup inside link labels | `MikuMd2xlsxCoreTest.extractsInlineMarkupInsideLinkLabelsLikeUpstreamExtractText` | Covered |
 | Mixed link text without cell hyperlink | `MikuMd2xlsxCoreTest.keepsMixedLinkAsTextWithoutHyperlink` | Covered |
 | GFM autolink cells | `MikuMd2xlsxCoreTest.treatsGfmAutolinkCellsAsExternalHyperlinks` | Covered |

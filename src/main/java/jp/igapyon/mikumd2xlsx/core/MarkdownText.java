@@ -1,6 +1,37 @@
 package jp.igapyon.mikumd2xlsx.core;
 
 final class MarkdownText {
+    private static final java.util.regex.Pattern INLINE_IMAGE =
+            java.util.regex.Pattern.compile("^!\\[([^\\]]*)\\]\\(([^)]*)\\)");
+    private static final java.util.regex.Pattern INLINE_LINK =
+            java.util.regex.Pattern.compile("^\\[([^\\]]+)\\]\\(([^)]*)\\)");
+    private static final java.util.regex.Pattern REFERENCE_LINK =
+            java.util.regex.Pattern.compile("^\\[([^\\]]+)\\]\\[([^\\]]*)\\]");
+    private static final java.util.regex.Pattern SHORTCUT_REFERENCE_LINK =
+            java.util.regex.Pattern.compile("^\\[([^\\]]+)\\]");
+    private static final java.util.regex.Pattern INTERNAL_MARKDOWN_LINK =
+            java.util.regex.Pattern.compile("^\\[([^\\]]+)\\]\\((#[^)]*)\\)\\s*\\(([^()]+![A-Z]{1,3}\\d+)\\)\\s*$");
+    private static final java.util.regex.Pattern EXTERNAL_MARKDOWN_LINK =
+            java.util.regex.Pattern.compile("^\\[([^\\]]+)\\]\\(([a-zA-Z][a-zA-Z0-9+.-]*:[^)]*)\\)\\s*$");
+    private static final java.util.regex.Pattern ANGLE_EXTERNAL_LINK =
+            java.util.regex.Pattern.compile("^<([a-zA-Z][a-zA-Z0-9+.-]*:[^>\\s]+)>$");
+    private static final java.util.regex.Pattern ANGLE_EMAIL =
+            java.util.regex.Pattern.compile("^<([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})>$");
+    private static final java.util.regex.Pattern BARE_EXTERNAL_LINK =
+            java.util.regex.Pattern.compile("^([a-zA-Z][a-zA-Z0-9+.-]*:[^\\s]+)$");
+    private static final java.util.regex.Pattern BARE_EMAIL =
+            java.util.regex.Pattern.compile("^([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})$");
+    private static final java.util.regex.Pattern BARE_WWW =
+            java.util.regex.Pattern.compile("^(www\\.[^\\s]+\\.[^\\s]+)$", java.util.regex.Pattern.CASE_INSENSITIVE);
+    private static final java.util.regex.Pattern MARKDOWN_LINK_LABEL =
+            java.util.regex.Pattern.compile("^\\[([^\\]]+)\\]\\(([^)]*)\\)(?:\\s*\\([^()]+![A-Z]{1,3}\\d+\\))?\\s*$");
+    private static final java.util.regex.Pattern ANGLE_LABEL =
+            java.util.regex.Pattern.compile("^<([^>\\s]+)>$");
+    private static final java.util.regex.Pattern BLOCK_IMAGE =
+            java.util.regex.Pattern.compile("^!\\[([^\\]]*)\\]\\(([^)]*)\\)\\s*$");
+    private static final java.util.regex.Pattern ANY_IMAGE =
+            java.util.regex.Pattern.compile("!\\[([^\\]]*)\\]\\(([^)]*)\\)");
+
     static final class CellContent {
         private final String value;
         private final HyperlinkModel hyperlink;
@@ -37,6 +68,10 @@ final class MarkdownText {
     }
 
     static CellContent cellContent(String value) {
+        return cellContent(value, java.util.Collections.<String>emptySet());
+    }
+
+    static CellContent cellContent(String value, java.util.Set<String> linkReferenceIds) {
         if (value == null) {
             return new CellContent("", null);
         }
@@ -45,11 +80,15 @@ final class MarkdownText {
         if (hyperlink != null) {
             return new CellContent(hyperlinkLabel(text, hyperlink).trim(), hyperlink);
         }
-        RichText richText = richText(text);
+        RichText richText = richText(text, linkReferenceIds);
         return new CellContent(richText.getValue().trim(), hyperlink, richText.getRuns());
     }
 
     private static RichText richText(String value) {
+        return richText(value, java.util.Collections.<String>emptySet());
+    }
+
+    private static RichText richText(String value, java.util.Set<String> linkReferenceIds) {
         java.util.List<RichTextRun> runs = new java.util.ArrayList<RichTextRun>();
         StringBuilder text = new StringBuilder();
         boolean bold = false;
@@ -116,8 +155,20 @@ final class MarkdownText {
                     text.append(link.getText());
                     i = link.getEndIndex();
                 } else {
-                    text.append(value.charAt(i));
-                    i++;
+                    ReferenceLinkInline referenceLink = referenceLinkInline(value, i);
+                    if (referenceLink != null) {
+                        text.append(referenceLink.getText());
+                        i = referenceLink.getEndIndex();
+                    } else {
+                        ReferenceLinkInline shortcutLink = shortcutReferenceLinkInline(value, i, linkReferenceIds);
+                        if (shortcutLink != null) {
+                            text.append(shortcutLink.getText());
+                            i = shortcutLink.getEndIndex();
+                        } else {
+                            text.append(value.charAt(i));
+                            i++;
+                        }
+                    }
                 }
             } else if (value.charAt(i) == '\\' && i + 1 < value.length()) {
                 text.append(value.charAt(i + 1));
@@ -196,9 +247,7 @@ final class MarkdownText {
     }
 
     private static ImageInline imageInline(String value, int start) {
-        java.util.regex.Matcher matcher = java.util.regex.Pattern
-                .compile("^!\\[([^\\]]*)\\]\\(([^)]*)\\)")
-                .matcher(value.substring(start));
+        java.util.regex.Matcher matcher = INLINE_IMAGE.matcher(value.substring(start));
         if (!matcher.find()) {
             return null;
         }
@@ -209,9 +258,7 @@ final class MarkdownText {
     }
 
     private static LinkInline linkInline(String value, int start) {
-        java.util.regex.Matcher matcher = java.util.regex.Pattern
-                .compile("^\\[([^\\]]+)\\]\\(([^)]*)\\)")
-                .matcher(value.substring(start));
+        java.util.regex.Matcher matcher = INLINE_LINK.matcher(value.substring(start));
         if (!matcher.find()) {
             return null;
         }
@@ -222,8 +269,49 @@ final class MarkdownText {
         return new LinkInline(text, start + matcher.end());
     }
 
+    private static ReferenceLinkInline referenceLinkInline(String value, int start) {
+        java.util.regex.Matcher matcher = REFERENCE_LINK.matcher(value.substring(start));
+        if (!matcher.find()) {
+            return null;
+        }
+        String rawLabel = unescapeMarkdown(matcher.group(1));
+        return new ReferenceLinkInline(extractInlineText(rawLabel), start + matcher.end());
+    }
+
+    private static ReferenceLinkInline shortcutReferenceLinkInline(String value, int start,
+            java.util.Set<String> linkReferenceIds) {
+        java.util.regex.Matcher matcher = SHORTCUT_REFERENCE_LINK.matcher(value.substring(start));
+        if (!matcher.find()) {
+            return null;
+        }
+        String rawLabel = unescapeMarkdown(matcher.group(1));
+        String label = extractInlineText(rawLabel);
+        if (!linkReferenceIds.contains(referenceId(label))) {
+            return null;
+        }
+        return new ReferenceLinkInline(label, start + matcher.end());
+    }
+
     private static String extractInlineText(String value) {
         return richText(value).getValue();
+    }
+
+    private static final class ReferenceLinkInline {
+        private final String text;
+        private final int endIndex;
+
+        ReferenceLinkInline(String text, int endIndex) {
+            this.text = text;
+            this.endIndex = endIndex;
+        }
+
+        String getText() {
+            return text;
+        }
+
+        int getEndIndex() {
+            return endIndex;
+        }
     }
 
     private static final class LinkInline {
@@ -323,45 +411,31 @@ final class MarkdownText {
     }
 
     private static HyperlinkModel hyperlink(String value) {
-        java.util.regex.Matcher internal = java.util.regex.Pattern
-                .compile("^\\[([^\\]]+)\\]\\((#[^)]*)\\)\\s*\\(([^()]+![A-Z]{1,3}\\d+)\\)\\s*$")
-                .matcher(value);
+        java.util.regex.Matcher internal = INTERNAL_MARKDOWN_LINK.matcher(value);
         if (internal.matches()) {
             return new HyperlinkModel(internal.group(3), "internal");
         }
-        java.util.regex.Matcher external = java.util.regex.Pattern
-                .compile("^\\[([^\\]]+)\\]\\(([a-zA-Z][a-zA-Z0-9+.-]*:[^)]*)\\)\\s*$")
-                .matcher(value);
+        java.util.regex.Matcher external = EXTERNAL_MARKDOWN_LINK.matcher(value);
         if (external.matches()) {
             return new HyperlinkModel(external.group(2), "external");
         }
-        java.util.regex.Matcher angleExternal = java.util.regex.Pattern
-                .compile("^<([a-zA-Z][a-zA-Z0-9+.-]*:[^>\\s]+)>$")
-                .matcher(value);
+        java.util.regex.Matcher angleExternal = ANGLE_EXTERNAL_LINK.matcher(value);
         if (angleExternal.matches()) {
             return new HyperlinkModel(angleExternal.group(1), "external");
         }
-        java.util.regex.Matcher angleEmail = java.util.regex.Pattern
-                .compile("^<([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})>$")
-                .matcher(value);
+        java.util.regex.Matcher angleEmail = ANGLE_EMAIL.matcher(value);
         if (angleEmail.matches()) {
             return new HyperlinkModel("mailto:" + angleEmail.group(1), "external");
         }
-        java.util.regex.Matcher bareExternal = java.util.regex.Pattern
-                .compile("^([a-zA-Z][a-zA-Z0-9+.-]*:[^\\s]+)$")
-                .matcher(value);
+        java.util.regex.Matcher bareExternal = BARE_EXTERNAL_LINK.matcher(value);
         if (bareExternal.matches()) {
             return new HyperlinkModel(bareExternal.group(1), "external");
         }
-        java.util.regex.Matcher bareEmail = java.util.regex.Pattern
-                .compile("^([A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,})$")
-                .matcher(value);
+        java.util.regex.Matcher bareEmail = BARE_EMAIL.matcher(value);
         if (bareEmail.matches()) {
             return new HyperlinkModel("mailto:" + bareEmail.group(1), "external");
         }
-        java.util.regex.Matcher bareWww = java.util.regex.Pattern
-                .compile("^(www\\.[^\\s]+\\.[^\\s]+)$", java.util.regex.Pattern.CASE_INSENSITIVE)
-                .matcher(value);
+        java.util.regex.Matcher bareWww = BARE_WWW.matcher(value);
         if (bareWww.matches()) {
             return new HyperlinkModel("http://" + bareWww.group(1), "external");
         }
@@ -369,13 +443,11 @@ final class MarkdownText {
     }
 
     private static String hyperlinkLabel(String value, HyperlinkModel hyperlink) {
-        java.util.regex.Matcher markdown = java.util.regex.Pattern
-                .compile("^\\[([^\\]]+)\\]\\(([^)]*)\\)(?:\\s*\\([^()]+![A-Z]{1,3}\\d+\\))?\\s*$")
-                .matcher(value);
+        java.util.regex.Matcher markdown = MARKDOWN_LINK_LABEL.matcher(value);
         if (markdown.matches()) {
             return extractInlineText(unescapeMarkdown(markdown.group(1)));
         }
-        java.util.regex.Matcher angle = java.util.regex.Pattern.compile("^<([^>\\s]+)>$").matcher(value);
+        java.util.regex.Matcher angle = ANGLE_LABEL.matcher(value);
         if (angle.matches()) {
             String label = angle.group(1);
             if (label.equals(hyperlink.getTarget()) || hyperlink.getTarget().equals("mailto:" + label)) {
@@ -393,6 +465,10 @@ final class MarkdownText {
 
     static String unescapeMarkdown(String value) {
         return value.replaceAll("\\\\([\\\\`*{}\\[\\]()#+\\-.!_|~])", "$1");
+    }
+
+    static String referenceId(String value) {
+        return value.trim().replaceAll("\\s+", " ").toLowerCase(java.util.Locale.ROOT);
     }
 
     private static String decodeHtmlEntities(String value) {
@@ -453,17 +529,19 @@ final class MarkdownText {
     }
 
     static String headingText(String line) {
+        return headingText(line, java.util.Collections.<String>emptySet());
+    }
+
+    static String headingText(String line, java.util.Set<String> linkReferenceIds) {
         String text = line.replaceFirst("^#{1,6}\\s*", "").replaceFirst("\\s+#+\\s*$", "");
-        return stripInlineMarkup(text);
+        return cellContent(text, linkReferenceIds).getValue();
     }
 
     static ImageRefModel imageRef(String value) {
         if (value == null) {
             return null;
         }
-        java.util.regex.Matcher image = java.util.regex.Pattern
-                .compile("^!\\[([^\\]]*)\\]\\(([^)]*)\\)\\s*$")
-                .matcher(value.trim());
+        java.util.regex.Matcher image = BLOCK_IMAGE.matcher(value.trim());
         if (!image.matches()) {
             return null;
         }
@@ -475,9 +553,7 @@ final class MarkdownText {
         if (value == null) {
             return refs;
         }
-        java.util.regex.Matcher image = java.util.regex.Pattern
-                .compile("!\\[([^\\]]*)\\]\\(([^)]*)\\)")
-                .matcher(value);
+        java.util.regex.Matcher image = ANY_IMAGE.matcher(value);
         while (image.find()) {
             refs.add(new ImageRefModel(unescapeMarkdown(image.group(1)), image.group(2).trim()));
         }

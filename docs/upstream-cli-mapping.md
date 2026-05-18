@@ -7,7 +7,7 @@
 | `--sheet-mode <mode>` | `--sheet-mode <mode>` | Ported |
 | `--sheet-heading-depth <n>` | `--sheet-heading-depth <n>` | Ported |
 | `--title <value>` | `--title <value>` | Ported |
-| `--table-style <mode>` | `--table-style <mode>` | Accepted; current Java styles are initial subset |
+| `--table-style <mode>` | `--table-style <mode>` | Ported |
 | `--no-header-row` | `--no-header-row` | Ported |
 | `--help` | `--help` | Ported |
 | `--version` | `--version` | Ported |
@@ -20,12 +20,13 @@ java -jar target/miku-md2xlsx-java-0.5.0.jar <input.md> --out <output.xlsx> [opt
 
 Known differences:
 
-- Local image embedding has initial support for local image references that can
-  be read relative to the input Markdown file.
-- Detailed table styling is not yet at upstream parity.
-- Rich text has initial support for common Markdown inline styles, but broader
-  upstream fixture parity is still pending.
-- Hyperlink and merge marker support has initial Java coverage, but broader
-  upstream fixture parity is still pending.
-- Output is a valid basic XLSX package, but byte-level parity with the Node
-  runtime is not expected at this stage.
+- Local image references are embedded when the referenced PNG/JPEG/GIF files
+  are available relative to the input Markdown file.
+- Remote image URLs are not downloaded.
+- Markdown table cell values are written as strings. Numeric-looking and
+  date-like Markdown text is not inferred as Excel numbers or dates.
+- Java-side coverage includes representative upstream fixture semantics,
+  table styling modes, rich text, hyperlinks, merge markers, drawings, image
+  sizing, and generated workbook XML.
+- Byte-level parity with the Node.js runtime is not a goal; representative
+  tests cover semantic workbook output.

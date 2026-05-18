@@ -21,15 +21,15 @@ The current Java runtime supports the following Markdown features:
 - miku-xlsx2md merge markers: `[←M←]` and `[↑M↑]`
 - worksheet column width hints
 
-The generated workbook is a basic `.xlsx` file. Java-side tests cover
+The generated workbook is an Open XML `.xlsx` workbook. Java-side tests cover
 representative upstream fixture semantics, image sizing, drawings, hyperlinks,
 merges, styles, and generated workbook XML. Exact Markdown AST compatibility
-with upstream `remark-parse` plus `remark-gfm` remains a migration follow-up
-item.
+with upstream `remark-parse` plus `remark-gfm` is optional future work rather
+than a bounded migration item.
 
 ## Requirements
 
-- Java runtime for running the jar
+- Java 8 or later runtime for running the jar
 - Maven for building from source
 
 The project source and target compatibility are fixed to Java 1.8.
@@ -60,7 +60,8 @@ java -jar target/miku-md2xlsx-java-0.5.0.jar book.md --out book.xlsx --sheet-mod
 - `--out <file>`: output `.xlsx` path
 - `--sheet-mode <mode>`: `single` or `heading`
 - `--sheet-heading-depth <n>`: `1` or `2`
-- `--title <value>`: workbook title or first sheet name
+- `--title <value>`: sheet name in `single` mode, or the fallback sheet name
+  before `heading` mode splits worksheets
 - `--table-style <mode>`: `plain` or `bordered`
 - `--no-header-row`: do not style the first Markdown table row as a header
 - `--help`: show help
@@ -84,7 +85,8 @@ worksheets.
   date-like Markdown text is not inferred as Excel numbers or dates.
 - `--table-style plain` keeps table body cells visually plain while preserving
   header styling unless `--no-header-row` is also specified.
-- Byte-level parity with the Node.js runtime is not expected at this stage.
+- Byte-level parity with the Node.js runtime is not a goal; representative
+  tests cover semantic workbook output.
 
 ## Development
 

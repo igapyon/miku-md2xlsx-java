@@ -41,6 +41,10 @@
 - Scanner hardening for spaced thematic breaks and ordered list markers that
   use `)`.
 - Scanner hardening for `remark-parse` list lazy continuation lines.
+- Scanner hardening for `remark-parse` link definition blocks so definitions
+  do not become workbook rows.
+- Scanner hardening for representative `remark-parse` HTML blocks so block
+  HTML remains raw text rather than inline rich text.
 - Scanner hardening for representative `remark-gfm` autolink cells, including
   angle-bracket URLs, bare scheme URLs, `www.` literals, and email addresses.
 - Scanner hardening for representative `remark-gfm` task list items by
@@ -55,6 +59,9 @@
   `markdown-text.ts` fallback to label text.
 - Link text extraction when label equals URL, matching upstream
   `markdown-text.ts` output without Markdown link syntax.
+- Reference link label extraction, matching upstream recursive `extractText`
+  behavior for reference link children.
+- Shortcut reference link label extraction when a matching definition exists.
 - Inline markup extraction inside link labels, including mixed text links,
   matching upstream recursive `extractText` behavior for link children.
 - Initial sheet-builder parity for single/heading modes, title handling,
@@ -96,6 +103,9 @@
   `image-basic-sample02` and shape fixture text/assets.
 - Tracked Java fixture resources and representative tests for grid and
   unsupported formula/chart semantic fixtures.
+- Package-level regression coverage that unsupported formula, chart, and shape
+  metadata remains text-only and does not create native formula/chart/shape
+  package parts.
 - Java-side semantic XLSX inspection helper comparable to upstream
   `tests/helpers/xlsx.js`, with coverage for workbook XML, worksheet values,
   relationships, merge refs, hyperlinks, drawing anchors, media entries, and
@@ -112,15 +122,11 @@
 
 ## Pending
 
-- Full Markdown AST compatibility with upstream `remark-parse` and
-  `remark-gfm` behavior.
-- Remaining workbook behavior review for broader fixture semantics and
-  unsupported xlsx2md metadata cases.
-- Broader drawing fixture parity for non-bitmap shape/chart-oriented fixtures
-  and accepted unsupported semantics.
-- Remaining exact semantic parity for unsupported formula/chart/shape
-  reconstruction, where Java currently preserves xlsx2md text but does not
-  recreate native Excel formulas, charts, or shapes.
+- Optional full Markdown AST compatibility with upstream `remark-parse` and
+  `remark-gfm` if exact parser parity becomes a hard requirement.
+- Optional semantic parity for unsupported formula/chart/shape
+  reconstruction if Java runtime scope is expanded beyond text-preserving
+  xlsx2md metadata conversion.
 
 The ordered roadmap is tracked in `TODO.md` under
 `Full Straight Conversion Roadmap`.
