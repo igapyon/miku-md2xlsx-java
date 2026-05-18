@@ -232,9 +232,10 @@ Open parity follow-ups are tracked in `TODO.md` and
 - Added `.github/workflows/release-cli-runtime.yml` for `v*` tags and manual
   dispatch.
 - The workflow builds with Maven, checks tag-to-`pom.xml` version compatibility,
-  prepares executable jar, sources jar, and dist zip release assets, verifies
-  the executable jar with Java 8 using `--version`, and uploads the assets to
-  GitHub Release.
+  prepares executable jar and sources jar release assets, verifies the
+  executable jar with Java 8 using `--version`, and uploads those jar assets to
+  GitHub Release. The local dist zip remains a Maven package output and is not
+  attached to GitHub Releases.
 - Confirmed Maven plugin support remains deferred to a possible separate
   repository after runtime parity work is complete.
 - Verified the current release-readiness slice with `mvn package`, jar

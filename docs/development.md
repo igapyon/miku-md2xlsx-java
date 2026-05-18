@@ -15,7 +15,7 @@ following repository-shape decisions were adopted:
 - single-module Maven runtime
 - `jp.igapyon.miku...` base package
 - thin CLI class with `run(String[], PrintStream, PrintStream)`
-- root `pom.xml` with Java 1.8, JUnit Jupiter, source jar, shaded jar, and dist zip
+- root `pom.xml` with Java 1.8, JUnit Jupiter, source jar, shaded jar, and local dist zip
 - `docs/` mapping documents and `TODO.md`
 - `workplace/.gitkeep` as the only tracked `workplace/` file
 
@@ -42,6 +42,7 @@ variant, and uploads:
 
 - `miku-md2xlsx-java-<version>.jar`
 - `miku-md2xlsx-java-sources-<version>.jar`
-- `miku-md2xlsx-java-dist-<version>.zip`
 
 The executable jar is verified with Java 8 using `--version` before upload.
+The Maven package still builds the local dist zip, but the dist zip is not
+attached to GitHub Releases.
