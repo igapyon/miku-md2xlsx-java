@@ -15,14 +15,17 @@
 Java command form:
 
 ```sh
-java -jar target/miku-md2xlsx-java-0.1.0.1.jar <input.md> --out <output.xlsx> [options]
+java -jar target/miku-md2xlsx-java-0.5.0.jar <input.md> --out <output.xlsx> [options]
 ```
 
 Known differences:
 
-- Local image embedding is not yet ported.
-- Rich text, hyperlinks, merge markers, and detailed table styling are not yet
-  at upstream parity.
+- Local image embedding has initial support for local image references that can
+  be read relative to the input Markdown file.
+- Detailed table styling is not yet at upstream parity.
+- Rich text has initial support for common Markdown inline styles, but broader
+  upstream fixture parity is still pending.
+- Hyperlink and merge marker support has initial Java coverage, but broader
+  upstream fixture parity is still pending.
 - Output is a valid basic XLSX package, but byte-level parity with the Node
   runtime is not expected at this stage.
-

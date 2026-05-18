@@ -28,6 +28,20 @@ parts.
 ```sh
 mvn test
 mvn package
-java -jar target/miku-md2xlsx-java-0.1.0.1.jar README.md --out README.xlsx
+java -jar target/miku-md2xlsx-java-0.5.0.jar README.md --out README.xlsx
 ```
 
+## Release Assets
+
+GitHub Release assets are produced by
+`.github/workflows/release-cli-runtime.yml`.
+
+The workflow runs for `v*` tags or manual `workflow_dispatch`, builds with
+Maven, checks that the tag version matches `pom.xml` version or a dot-suffixed
+variant, and uploads:
+
+- `miku-md2xlsx-java-<version>.jar`
+- `miku-md2xlsx-java-sources-<version>.jar`
+- `miku-md2xlsx-java-dist-<version>.zip`
+
+The executable jar is verified with Java 8 using `--version` before upload.

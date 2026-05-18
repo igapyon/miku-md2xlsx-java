@@ -6,6 +6,12 @@ public class Md2XlsxOptions {
     private String title;
     private String tableStyle = "bordered";
     private boolean headerRow = true;
+    private java.util.List<ImageAsset> imageAssets = java.util.Collections.emptyList();
+    private ImageLoader imageLoader;
+
+    public interface ImageLoader {
+        ImageAsset load(String path);
+    }
 
     public String getSheetMode() {
         return sheetMode;
@@ -55,5 +61,24 @@ public class Md2XlsxOptions {
     public void setHeaderRow(boolean headerRow) {
         this.headerRow = headerRow;
     }
-}
 
+    public java.util.List<ImageAsset> getImageAssets() {
+        return java.util.Collections.unmodifiableList(imageAssets);
+    }
+
+    public void setImageAssets(java.util.List<ImageAsset> imageAssets) {
+        if (imageAssets == null) {
+            this.imageAssets = java.util.Collections.emptyList();
+        } else {
+            this.imageAssets = new java.util.ArrayList<ImageAsset>(imageAssets);
+        }
+    }
+
+    public ImageLoader getImageLoader() {
+        return imageLoader;
+    }
+
+    public void setImageLoader(ImageLoader imageLoader) {
+        this.imageLoader = imageLoader;
+    }
+}
