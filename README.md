@@ -97,7 +97,7 @@ mvn package
 
 Release assets are built by `.github/workflows/release-cli-runtime.yml` for
 `v*` tags or manual workflow dispatch. The workflow uploads the executable jar,
-sources jar, and dist zip to the matching GitHub Release.
+and sources jar to the matching GitHub Release.
 
 Repository conventions:
 

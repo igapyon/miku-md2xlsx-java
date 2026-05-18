@@ -59,7 +59,6 @@ jobs:
           mkdir -p release-assets
           cp "${RUNTIME_TARGET_DIR}/${ARTIFACT_ID}-${POM_VERSION}.jar" "release-assets/${ARTIFACT_ID}-${VERSION}.jar"
           cp "${RUNTIME_TARGET_DIR}/${ARTIFACT_ID}-${POM_VERSION}-sources.jar" "release-assets/${ARTIFACT_ID}-sources-${VERSION}.jar"
-          cp "${RUNTIME_TARGET_DIR}/${ARTIFACT_ID}-${POM_VERSION}-dist.zip" "release-assets/${ARTIFACT_ID}-dist-${VERSION}.zip"
 
       - name: Set up Java 8 for runtime verification
         uses: actions/setup-java@v4
@@ -72,7 +71,7 @@ jobs:
           set -euo pipefail
           java -jar release-assets/${RELEASE_ARTIFACT_ID}-[0-9]*.jar --version
 
-      - name: Upload CLI runtime to GitHub Release
+      - name: Upload CLI runtime jars to GitHub Release
         uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ github.event.inputs.tag_name || github.ref_name }}

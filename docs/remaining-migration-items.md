@@ -113,8 +113,9 @@
 - Practical Java equivalent of upstream `semantic-roundtrip.mjs` coverage for
   representative fixtures by asserting semantic tokens from generated workbook
   XML values.
-- GitHub Release asset workflow for executable jar, sources jar, and dist zip
-  assets with Java 8 runtime verification.
+- GitHub Release asset workflow for executable jar and sources jar assets with
+  Java 8 runtime verification. The local dist zip remains a Maven package
+  output and is not attached to GitHub Releases.
 - Maven plugin support remains deferred to a possible separate repository after
   runtime parity work is complete.
 - Current slice verified with `mvn test`, `mvn package`, jar `--help`, jar

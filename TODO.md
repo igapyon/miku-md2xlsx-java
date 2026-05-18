@@ -175,8 +175,9 @@
   coverage by converting representative upstream fixtures to XLSX packages and
   asserting semantic tokens from generated workbook XML values.
 - Added a GitHub Release asset workflow for `v*` tags/manual dispatch,
-  producing executable jar, sources jar, and dist zip assets with Java 8
-  runtime verification.
+  producing executable jar and sources jar assets with Java 8 runtime
+  verification. The local dist zip is built by Maven but is not uploaded to
+  GitHub Releases.
 - Confirmed Maven plugin support remains deferred to a possible separate
   repository after runtime parity work is complete.
 - Ran the release-readiness command set for the current slice: `mvn test`,
