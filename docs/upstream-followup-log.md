@@ -169,6 +169,15 @@ Open parity follow-ups are tracked in `TODO.md` and
   as `> First` followed by `continued`.
 - Hardened list parsing for `remark-parse` lazy continuation lines while
   preserving nested list rows as separate indented rows.
+- Hardened scanner handling for `remark-parse` link definition blocks so
+  `[id]: https://...` definitions are skipped rather than written as paragraph
+  rows.
+- Aligned reference link text extraction for `[label][id]` and `[label][]` so
+  link reference labels contribute text without creating Excel hyperlinks.
+- Aligned shortcut reference links such as `[label]` when a matching link
+  definition exists, while leaving unknown bracketed text literal.
+- Hardened representative HTML block parsing so block tags such as `<div>` are
+  preserved as raw text and do not trigger inline rich-text handling.
 - Aligned image text extraction for empty image URLs so `![alt]()` contributes
   `alt` to cell text, matching upstream `markdown-text.ts`.
 - Aligned link text extraction for empty link URLs so `[label]()` contributes
@@ -200,6 +209,9 @@ Open parity follow-ups are tracked in `TODO.md` and
   but does not reconstruct native Excel shared formulas, spill formulas, or
   native chart objects. Treat this as accepted unsupported semantics unless a
   later scope explicitly adds formula/chart reconstruction.
+- Added package-level regression coverage for the accepted unsupported
+  semantics: formula/chart/shape metadata remains worksheet text and does not
+  create native formula, chart, or shape drawing package parts.
 
 ## 2026-05-18 Semantic XLSX Inspection
 

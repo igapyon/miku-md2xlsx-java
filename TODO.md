@@ -12,18 +12,17 @@
 
 ### 2. Markdown Parsing Parity
 
-- Replace or harden the current lightweight Markdown scanner so behavior is
-  traceable to upstream `remark-parse` plus `remark-gfm`.
-- Port inline extraction from `markdown-inline.ts`, `markdown-text.ts`,
-  `markdown-rich-text.ts`, `markdown-links.ts`, and `markdown-images.ts`.
-- Add broader regression tests for upstream `remark-gfm` edge cases after the
-  scanner is replaced or hardened further.
+- No open bounded Markdown parsing parity items in this section.
+- Future optional work: replace the lightweight scanner with a full Markdown
+  AST parser if exact `remark-parse` / `remark-gfm` compatibility becomes a
+  hard requirement.
 
 ### 3. Workbook Model Parity
 
-- Continue broader model parity review against upstream fixture behavior,
-  especially formula-oriented, display-format, chart, named-range, shape, and
-  unsupported xlsx2md metadata cases.
+- No open bounded workbook model parity items in this section.
+- Future optional work: add native Excel formula, chart, and shape
+  reconstruction if Java runtime scope expands beyond preserving xlsx2md
+  metadata as workbook text.
 
 ### 4. XLSX Package Parity
 
@@ -126,6 +125,14 @@
   continuation lines.
 - Hardened the lightweight Markdown scanner for `remark-parse` list lazy
   continuation lines.
+- Hardened the lightweight Markdown scanner for `remark-parse` link definition
+  blocks so definitions do not become workbook rows.
+- Aligned reference link text extraction for `[label][id]` and `[label][]`
+  with upstream recursive `extractText` behavior.
+- Aligned shortcut reference link text extraction when a matching link
+  definition exists, while leaving unknown bracketed text literal.
+- Hardened representative `remark-parse` HTML block handling so block HTML is
+  preserved as raw text rather than inline rich text.
 - Aligned initial `sheet-builder.ts` behavior for `single` and `heading`
   modes, duplicate sheet names, illegal sheet name characters, title handling,
   preface rows, and `--sheet-heading-depth 1/2`.
@@ -194,3 +201,10 @@
   `grid-layout-sample-01`, `formula-shared-sample01`,
   `formula-spill-sample01`, and `chart-mixed-sample01`, recording unsupported
   formula/chart reconstruction semantics explicitly.
+- Added package-level regression coverage that unsupported formula, chart, and
+  shape metadata remains text-only and does not create native Excel formula,
+  chart, or shape drawing package parts.
+- Refactored core responsibilities without behavior changes: extracted
+  Markdown row parsing, heading-mode sheet splitting, internal hyperlink
+  normalization, XLSX image size reading, and reusable Markdown regex patterns
+  from the larger builder/helper classes.

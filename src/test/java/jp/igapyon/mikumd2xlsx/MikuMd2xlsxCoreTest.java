@@ -333,6 +333,27 @@ class MikuMd2xlsxCoreTest {
     }
 
     @Test
+    void keepsUnsupportedFormulaChartAndShapeMetadataAsTextOnly() throws IOException {
+        byte[] formula = new MikuMd2xlsxCore().md2xlsx(fixture("formula-shared-sample01.md"));
+        String formulaWorksheet = zipEntry(formula, "xl/worksheets/sheet1.xml");
+        assertTrue(formulaWorksheet.contains("shared formula サンプル"));
+        assertTrue(!formulaWorksheet.contains("<f"));
+
+        byte[] chart = new MikuMd2xlsxCore().md2xlsx(fixture("chart-mixed-sample01.md"));
+        java.util.List<String> chartEntries = zipEntryNames(chart);
+        String chartWorksheet = zipEntry(chart, "xl/worksheets/sheet1.xml");
+        assertTrue(chartWorksheet.contains("Chart: 001"));
+        assertTrue(chartWorksheet.contains("Bar Chart + Line Chart"));
+        assertTrue(!chartEntries.contains("xl/charts/chart1.xml"));
+
+        byte[] shape = new MikuMd2xlsxCore().md2xlsx(fixture("shape-flowchart-sample01.md"));
+        java.util.List<String> shapeEntries = zipEntryNames(shape);
+        String shapeWorksheet = zipEntry(shape, "xl/worksheets/sheet1.xml");
+        assertTrue(shapeWorksheet.contains("フローチャート図形サンプル"));
+        assertTrue(!shapeEntries.contains("xl/drawings/drawing1.xml"));
+    }
+
+    @Test
     void writesHyperlinkRelationshipsFromUpstreamFixture() throws IOException {
         String markdown = fixture("hyperlink-basic-sample01.md");
         Md2XlsxOptions options = new Md2XlsxOptions();
@@ -429,6 +450,15 @@ class MikuMd2xlsxCoreTest {
     }
 
     @Test
+    void skipsLinkDefinitionsLikeRemarkParse() {
+        WorkbookModel workbook = new MikuMd2xlsxCore().markdownToXlsxModel("Before\n\n[id]: https://example.com/\n  \"Title\"\n\nAfter\n");
+        assertEquals("Before", workbook.getSheets().get(0).getRows().get(0).getCells().get(0).getValue());
+        assertEquals("blank", workbook.getSheets().get(0).getRows().get(1).getKind());
+        assertEquals("blank", workbook.getSheets().get(0).getRows().get(2).getKind());
+        assertEquals("After", workbook.getSheets().get(0).getRows().get(3).getCells().get(0).getValue());
+    }
+
+    @Test
     void stripsGfmTaskListCheckboxesLikeRemarkGfm() {
         WorkbookModel workbook = new MikuMd2xlsxCore().markdownToXlsxModel("- [x] Done\n- [ ] Todo\n1. [X] Ordered done\n");
         assertEquals("- Done", workbook.getSheets().get(0).getRows().get(0).getCells().get(0).getValue());
@@ -457,6 +487,16 @@ class MikuMd2xlsxCoreTest {
         assertEquals("> First\n> continued", workbook.getSheets().get(0).getRows().get(0).getCells().get(0).getValue());
         assertEquals("blank", workbook.getSheets().get(0).getRows().get(1).getKind());
         assertEquals("Next", workbook.getSheets().get(0).getRows().get(2).getCells().get(0).getValue());
+    }
+
+    @Test
+    void keepsHtmlBlocksRawLikeRemarkParse() {
+        WorkbookModel workbook = new MikuMd2xlsxCore().markdownToXlsxModel("<div>\n<ins>literal</ins>\n</div>\n\nAfter\n");
+        CellModel html = workbook.getSheets().get(0).getRows().get(0).getCells().get(0);
+        assertEquals("<div>\n<ins>literal</ins>\n</div>", html.getValue());
+        assertEquals(0, html.getRichTextRuns().size());
+        assertEquals("blank", workbook.getSheets().get(0).getRows().get(1).getKind());
+        assertEquals("After", workbook.getSheets().get(0).getRows().get(2).getCells().get(0).getValue());
     }
 
     @Test
@@ -653,6 +693,23 @@ class MikuMd2xlsxCoreTest {
         WorkbookModel workbook = new MikuMd2xlsxCore().markdownToXlsxModel("See [https://example.com](https://example.com) now\n");
         assertEquals("See https://example.com now", workbook.getSheets().get(0).getRows().get(0).getCells().get(0).getValue());
         assertEquals(null, workbook.getSheets().get(0).getRows().get(0).getCells().get(0).getHyperlink());
+    }
+
+    @Test
+    void extractsReferenceLinkLabelsLikeUpstreamExtractText() {
+        WorkbookModel workbook = new MikuMd2xlsxCore().markdownToXlsxModel("See [**Label**][id] and [Other][] now\n\n[id]: https://example.com/\n[Other]: https://example.org/\n");
+        CellModel cell = workbook.getSheets().get(0).getRows().get(0).getCells().get(0);
+        assertEquals("See Label and Other now", cell.getValue());
+        assertEquals(null, cell.getHyperlink());
+        assertEquals(0, cell.getRichTextRuns().size());
+    }
+
+    @Test
+    void extractsShortcutReferenceLinkLabelsWhenDefinitionExistsLikeRemarkParse() {
+        WorkbookModel workbook = new MikuMd2xlsxCore().markdownToXlsxModel("See [**Label**] and [Unknown]\n\n[label]: https://example.com/\n");
+        CellModel cell = workbook.getSheets().get(0).getRows().get(0).getCells().get(0);
+        assertEquals("See Label and [Unknown]", cell.getValue());
+        assertEquals(0, cell.getRichTextRuns().size());
     }
 
     @Test
