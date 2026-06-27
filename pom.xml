@@ -5,7 +5,7 @@
 
   <groupId>jp.igapyon</groupId>
   <artifactId>miku-md2xlsx-java</artifactId>
-  <version>0.5.0</version>
+  <version>0.6.5</version>
   <packaging>jar</packaging>
 
   <name>miku-md2xlsx-java</name>
@@ -17,6 +17,8 @@
     <maven.compiler.source>1.8</maven.compiler.source>
     <maven.compiler.target>1.8</maven.compiler.target>
     <junit.jupiter.version>5.14.1</junit.jupiter.version>
+    <maven.antrun.plugin.version>3.1.0</maven.antrun.plugin.version>
+    <miku.ms.office.core.version>0.5.1</miku.ms.office.core.version>
   </properties>
 
   <dependencies>
@@ -39,6 +41,27 @@
           <target>${maven.compiler.target}</target>
           <encoding>${project.build.sourceEncoding}</encoding>
         </configuration>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-antrun-plugin</artifactId>
+        <version>${maven.antrun.plugin.version}</version>
+        <executions>
+          <execution>
+            <id>unpack-vendored-runtime-dependencies</id>
+            <phase>generate-sources</phase>
+            <goals>
+              <goal>run</goal>
+            </goals>
+            <configuration>
+              <target>
+                <unzip
+                    src="${project.basedir}/vendor/miku-ms-office-core-java/miku-ms-office-core-${miku.ms.office.core.version}.jar"
+                    dest="${project.build.outputDirectory}" />
+              </target>
+            </configuration>
+          </execution>
+        </executions>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>

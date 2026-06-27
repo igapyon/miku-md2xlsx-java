@@ -38,21 +38,21 @@ The project source and target compatibility are fixed to Java 1.8.
 
 ```sh
 mvn package
-java -jar target/miku-md2xlsx-java-0.5.0.jar README.md --out README.xlsx
+java -jar target/miku-md2xlsx-java-0.6.5.jar README.md --out README.xlsx
 ```
 
 ## Command Form
 
 ```sh
-java -jar target/miku-md2xlsx-java-0.5.0.jar <input.md> --out <output.xlsx> [options]
+java -jar target/miku-md2xlsx-java-0.6.5.jar <input.md> --out <output.xlsx> [options]
 ```
 
 Examples:
 
 ```sh
-java -jar target/miku-md2xlsx-java-0.5.0.jar sample.md --out sample.xlsx
-java -jar target/miku-md2xlsx-java-0.5.0.jar book.md --out book.xlsx --sheet-mode heading
-java -jar target/miku-md2xlsx-java-0.5.0.jar book.md --out book.xlsx --sheet-mode heading --sheet-heading-depth 2
+java -jar target/miku-md2xlsx-java-0.6.5.jar sample.md --out sample.xlsx
+java -jar target/miku-md2xlsx-java-0.6.5.jar book.md --out book.xlsx --sheet-mode heading
+java -jar target/miku-md2xlsx-java-0.6.5.jar book.md --out book.xlsx --sheet-mode heading --sheet-heading-depth 2
 ```
 
 ## Options
@@ -104,6 +104,8 @@ Repository conventions:
 - Java source and target compatibility are fixed to `1.8`.
 - Maven is the build tool.
 - JUnit Jupiter is the test framework.
+- `vendor/miku-ms-office-core-java/` contains the shared Office core release
+  jar used for low-level ZIP/OPC/XML package helpers.
 - `workplace/` is local scratch space. Only `workplace/.gitkeep` is tracked.
 - `.mvn/jvm.config` is tracked for repository-local Maven JVM settings.
 

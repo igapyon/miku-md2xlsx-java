@@ -28,7 +28,7 @@ parts.
 ```sh
 mvn test
 mvn package
-java -jar target/miku-md2xlsx-java-0.5.0.jar README.md --out README.xlsx
+java -jar target/miku-md2xlsx-java-0.6.5.jar README.md --out README.xlsx
 ```
 
 ## Release Assets

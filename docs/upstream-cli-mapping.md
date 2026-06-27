@@ -15,7 +15,7 @@
 Java command form:
 
 ```sh
-java -jar target/miku-md2xlsx-java-0.5.0.jar <input.md> --out <output.xlsx> [options]
+java -jar target/miku-md2xlsx-java-0.6.5.jar <input.md> --out <output.xlsx> [options]
 ```
 
 Known differences:
