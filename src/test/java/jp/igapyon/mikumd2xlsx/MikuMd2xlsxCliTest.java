@@ -20,7 +20,7 @@ class MikuMd2xlsxCliTest {
     void printsVersion() {
         CliRun run = runCli("--version");
         assertEquals(0, run.exitCode);
-        assertEquals("0.5.0\n", run.out);
+        assertEquals("0.6.5\n", run.out);
         assertEquals("", run.err);
     }
 
@@ -30,7 +30,7 @@ class MikuMd2xlsxCliTest {
         String help = run.out;
         assertEquals(0, run.exitCode);
         assertEquals("", run.err);
-        assertTrue(help.contains("miku-md2xlsx 0.5.0"));
+        assertTrue(help.contains("miku-md2xlsx 0.6.5"));
         assertTrue(help.contains("miku-md2xlsx converts a Markdown file into an Excel .xlsx workbook."));
         assertTrue(help.contains("Usage:"));
         assertTrue(help.contains("Arguments:"));

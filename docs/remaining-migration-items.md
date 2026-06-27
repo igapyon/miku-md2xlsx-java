@@ -83,9 +83,9 @@
   present.
 - Upstream `xlsx-merge.ts` merge range calculation for horizontal, vertical,
   and 2x2 merge marker patterns.
-- Deterministic ZIP output behavior corresponding to upstream `zip-io.ts`,
-  including fixed entry timestamps, stable entry order, and deterministic image
-  content type default ordering.
+- Deterministic ZIP output behavior corresponding to upstream
+  `miku-ms-office-core` package helpers, including fixed entry timestamps,
+  stable entry order, and deterministic image content type default ordering.
 - Upstream `xlsx-worksheet.ts` worksheet output behavior for dimensions,
   column hints including empty hints, inline string cells, hyperlinks, merges,
   and drawing relationships.
@@ -139,7 +139,7 @@ Run:
 ```sh
 mvn test
 mvn package
-java -jar target/miku-md2xlsx-java-0.5.0.jar --help
-java -jar target/miku-md2xlsx-java-0.5.0.jar --version
-java -jar target/miku-md2xlsx-java-0.5.0.jar src/test/resources/fixtures/from-xlsx2md/xlsx2md-basic-sample01.md --out target/verification-basic.xlsx --sheet-mode heading --sheet-heading-depth 2
+java -jar target/miku-md2xlsx-java-0.6.5.jar --help
+java -jar target/miku-md2xlsx-java-0.6.5.jar --version
+java -jar target/miku-md2xlsx-java-0.6.5.jar src/test/resources/fixtures/from-xlsx2md/xlsx2md-basic-sample01.md --out target/verification-basic.xlsx --sheet-mode heading --sheet-heading-depth 2
 ```

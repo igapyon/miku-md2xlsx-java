@@ -1,10 +1,12 @@
 package jp.igapyon.mikumd2xlsx.core;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipOutputStream;
+import jp.igapyon.mikumsofficecore.OpcContentTypeDefault;
+import jp.igapyon.mikumsofficecore.OpcContentTypeOverride;
+import jp.igapyon.mikumsofficecore.OpcContentTypes;
+import jp.igapyon.mikumsofficecore.OpcRelationship;
+import jp.igapyon.mikumsofficecore.OpcRelationships;
+import jp.igapyon.mikumsofficecore.ZipEntryInput;
+import jp.igapyon.mikumsofficecore.ZipPackage;
 
 class XlsxPackageBuilder {
     private static final int IMAGE_PREVIEW_COLUMNS = 3;
@@ -16,97 +18,79 @@ class XlsxPackageBuilder {
     private final XlsxImageSizeReader imageSizeReader = new XlsxImageSizeReader();
 
     byte[] build(WorkbookModel workbook) {
-        try {
-            WorkbookModel renderWorkbook = withReservedImagePreviewRows(workbook);
-            java.util.List<SheetDrawing> drawings = collectSheetDrawings(renderWorkbook);
-            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
-            ZipOutputStream zip = new ZipOutputStream(bytes, StandardCharsets.UTF_8);
-            add(zip, "[Content_Types].xml", contentTypes(renderWorkbook.getSheets().size(), drawings));
-            add(zip, "_rels/.rels", rootRels());
-            add(zip, "xl/workbook.xml", workbookXml(renderWorkbook));
-            add(zip, "xl/_rels/workbook.xml.rels", workbookRels(renderWorkbook.getSheets().size()));
-            add(zip, "xl/styles.xml", stylesXml());
-            add(zip, "docProps/core.xml", coreProps());
-            add(zip, "docProps/app.xml", appProps(renderWorkbook.getSheets().size()));
-            for (int i = 0; i < renderWorkbook.getSheets().size(); i++) {
-                SheetModel sheet = renderWorkbook.getSheets().get(i);
-                SheetDrawing drawing = drawingForSheet(drawings, i + 1);
-                add(zip, "xl/worksheets/sheet" + (i + 1) + ".xml", worksheetXml(sheet, drawing));
-                if (hasWorksheetRelationships(sheet, drawing)) {
-                    add(zip, "xl/worksheets/_rels/sheet" + (i + 1) + ".xml.rels", worksheetRelsXml(sheet, drawing));
-                }
+        WorkbookModel renderWorkbook = withReservedImagePreviewRows(workbook);
+        java.util.List<SheetDrawing> drawings = collectSheetDrawings(renderWorkbook);
+        java.util.List<ZipEntryInput> entries = new java.util.ArrayList<ZipEntryInput>();
+        entries.add(new ZipEntryInput("[Content_Types].xml", contentTypes(renderWorkbook.getSheets().size(), drawings)));
+        entries.add(new ZipEntryInput("_rels/.rels", rootRels()));
+        entries.add(new ZipEntryInput("xl/workbook.xml", workbookXml(renderWorkbook)));
+        entries.add(new ZipEntryInput("xl/_rels/workbook.xml.rels", workbookRels(renderWorkbook.getSheets().size())));
+        entries.add(new ZipEntryInput("xl/styles.xml", stylesXml()));
+        entries.add(new ZipEntryInput("docProps/core.xml", coreProps()));
+        entries.add(new ZipEntryInput("docProps/app.xml", appProps(renderWorkbook.getSheets().size())));
+        for (int i = 0; i < renderWorkbook.getSheets().size(); i++) {
+            SheetModel sheet = renderWorkbook.getSheets().get(i);
+            SheetDrawing drawing = drawingForSheet(drawings, i + 1);
+            entries.add(new ZipEntryInput("xl/worksheets/sheet" + (i + 1) + ".xml", worksheetXml(sheet, drawing)));
+            if (hasWorksheetRelationships(sheet, drawing)) {
+                entries.add(new ZipEntryInput("xl/worksheets/_rels/sheet" + (i + 1) + ".xml.rels", worksheetRelsXml(sheet, drawing)));
             }
-            for (SheetDrawing drawing : drawings) {
-                add(zip, "xl/drawings/drawing" + drawing.getDrawingIndex() + ".xml", drawingXml(drawing));
-                add(zip, "xl/drawings/_rels/drawing" + drawing.getDrawingIndex() + ".xml.rels", drawingRelsXml(drawing));
-                for (EmbeddedImage image : drawing.getImages()) {
-                    add(zip, "xl/media/" + image.getMediaPath(), image.getAsset().getData());
-                }
-            }
-            zip.close();
-            return bytes.toByteArray();
-        } catch (IOException ex) {
-            throw new IllegalStateException(ex);
         }
-    }
-
-    private void add(ZipOutputStream zip, String path, String data) throws IOException {
-        ZipEntry entry = new ZipEntry(path);
-        entry.setTime(0L);
-        zip.putNextEntry(entry);
-        zip.write(data.getBytes(StandardCharsets.UTF_8));
-        zip.closeEntry();
-    }
-
-    private void add(ZipOutputStream zip, String path, byte[] data) throws IOException {
-        ZipEntry entry = new ZipEntry(path);
-        entry.setTime(0L);
-        zip.putNextEntry(entry);
-        zip.write(data);
-        zip.closeEntry();
+        for (SheetDrawing drawing : drawings) {
+            entries.add(new ZipEntryInput("xl/drawings/drawing" + drawing.getDrawingIndex() + ".xml", drawingXml(drawing)));
+            entries.add(new ZipEntryInput("xl/drawings/_rels/drawing" + drawing.getDrawingIndex() + ".xml.rels", drawingRelsXml(drawing)));
+            for (EmbeddedImage image : drawing.getImages()) {
+                entries.add(new ZipEntryInput("xl/media/" + image.getMediaPath(), image.getAsset().getData()));
+            }
+        }
+        return ZipPackage.writeZipPackage(entries);
     }
 
     private String contentTypes(int sheetCount, java.util.List<SheetDrawing> drawings) {
-        StringBuilder sheets = new StringBuilder();
-        for (int i = 0; i < sheetCount; i++) {
-            sheets.append("<Override PartName=\"/xl/worksheets/sheet").append(i + 1)
-                    .append(".xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml\"/>");
-        }
-        StringBuilder drawingOverrides = new StringBuilder();
+        java.util.List<OpcContentTypeDefault> defaults = new java.util.ArrayList<OpcContentTypeDefault>();
+        defaults.add(new OpcContentTypeDefault("rels", "application/vnd.openxmlformats-package.relationships+xml"));
+        defaults.add(new OpcContentTypeDefault("xml", "application/xml"));
         java.util.Set<String> imageExtensions = new java.util.TreeSet<String>();
         for (SheetDrawing drawing : drawings) {
-            drawingOverrides.append("<Override PartName=\"/xl/drawings/drawing").append(drawing.getDrawingIndex())
-                    .append(".xml\" ContentType=\"application/vnd.openxmlformats-officedocument.drawing+xml\"/>");
             for (EmbeddedImage image : drawing.getImages()) {
                 imageExtensions.add(mediaExtension(image.getAsset()));
             }
         }
-        StringBuilder imageDefaults = new StringBuilder();
         for (String extension : imageExtensions) {
-            imageDefaults.append("<Default Extension=\"").append(XmlUtils.xml(extension)).append("\" ContentType=\"")
-                    .append(mediaContentType(extension)).append("\"/>");
+            defaults.add(new OpcContentTypeDefault(extension, mediaContentType(extension)));
         }
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
-                + "<Types xmlns=\"http://schemas.openxmlformats.org/package/2006/content-types\">"
-                + "<Default Extension=\"rels\" ContentType=\"application/vnd.openxmlformats-package.relationships+xml\"/>"
-                + "<Default Extension=\"xml\" ContentType=\"application/xml\"/>"
-                + imageDefaults
-                + "<Override PartName=\"/xl/workbook.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml\"/>"
-                + "<Override PartName=\"/xl/styles.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml\"/>"
-                + "<Override PartName=\"/docProps/core.xml\" ContentType=\"application/vnd.openxmlformats-package.core-properties+xml\"/>"
-                + "<Override PartName=\"/docProps/app.xml\" ContentType=\"application/vnd.openxmlformats-officedocument.extended-properties+xml\"/>"
-                + sheets
-                + drawingOverrides
-                + "</Types>";
+
+        java.util.List<OpcContentTypeOverride> overrides = new java.util.ArrayList<OpcContentTypeOverride>();
+        overrides.add(new OpcContentTypeOverride("xl/workbook.xml",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"));
+        overrides.add(new OpcContentTypeOverride("xl/styles.xml",
+                "application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"));
+        overrides.add(new OpcContentTypeOverride("docProps/core.xml",
+                "application/vnd.openxmlformats-package.core-properties+xml"));
+        overrides.add(new OpcContentTypeOverride("docProps/app.xml",
+                "application/vnd.openxmlformats-officedocument.extended-properties+xml"));
+        for (int i = 0; i < sheetCount; i++) {
+            overrides.add(new OpcContentTypeOverride("xl/worksheets/sheet" + (i + 1) + ".xml",
+                    "application/vnd.openxmlformats-officedocument.spreadsheetml.worksheet+xml"));
+        }
+        for (SheetDrawing drawing : drawings) {
+            overrides.add(new OpcContentTypeOverride("xl/drawings/drawing" + drawing.getDrawingIndex() + ".xml",
+                    "application/vnd.openxmlformats-officedocument.drawing+xml"));
+        }
+        return OpcContentTypes.buildOpcContentTypesXml(new OpcContentTypes(defaults, overrides));
     }
 
     private String rootRels() {
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
-                + "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">"
-                + "<Relationship Id=\"rId1\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument\" Target=\"xl/workbook.xml\"/>"
-                + "<Relationship Id=\"rId2\" Type=\"http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties\" Target=\"docProps/core.xml\"/>"
-                + "<Relationship Id=\"rId3\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties\" Target=\"docProps/app.xml\"/>"
-                + "</Relationships>";
+        return OpcRelationships.buildOpcRelationshipsXml(java.util.Arrays.asList(
+                new OpcRelationship("rId1",
+                        "http://schemas.openxmlformats.org/officeDocument/2006/relationships/officeDocument",
+                        "xl/workbook.xml"),
+                new OpcRelationship("rId2",
+                        "http://schemas.openxmlformats.org/package/2006/relationships/metadata/core-properties",
+                        "docProps/core.xml"),
+                new OpcRelationship("rId3",
+                        "http://schemas.openxmlformats.org/officeDocument/2006/relationships/extended-properties",
+                        "docProps/app.xml")));
     }
 
     private String workbookXml(WorkbookModel workbook) {
@@ -122,18 +106,16 @@ class XlsxPackageBuilder {
     }
 
     private String workbookRels(int sheetCount) {
-        StringBuilder rels = new StringBuilder();
+        java.util.List<OpcRelationship> relationships = new java.util.ArrayList<OpcRelationship>();
         for (int i = 0; i < sheetCount; i++) {
-            rels.append("<Relationship Id=\"rId").append(i + 1)
-                    .append("\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet\" Target=\"worksheets/sheet")
-                    .append(i + 1).append(".xml\"/>");
+            relationships.add(new OpcRelationship("rId" + (i + 1),
+                    "http://schemas.openxmlformats.org/officeDocument/2006/relationships/worksheet",
+                    "worksheets/sheet" + (i + 1) + ".xml"));
         }
-        rels.append("<Relationship Id=\"rId").append(sheetCount + 1)
-                .append("\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles\" Target=\"styles.xml\"/>");
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
-                + "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">"
-                + rels
-                + "</Relationships>";
+        relationships.add(new OpcRelationship("rId" + (sheetCount + 1),
+                "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles",
+                "styles.xml"));
+        return OpcRelationships.buildOpcRelationshipsXml(relationships);
     }
 
     private String worksheetXml(SheetModel sheet, SheetDrawing drawing) {
@@ -198,24 +180,21 @@ class XlsxPackageBuilder {
     }
 
     private String worksheetRelsXml(SheetModel sheet, SheetDrawing drawing) {
-        StringBuilder rels = new StringBuilder();
+        java.util.List<OpcRelationship> relationships = new java.util.ArrayList<OpcRelationship>();
         if (drawing != null) {
-            rels.append("<Relationship Id=\"").append(drawing.getRelationshipId())
-                    .append("\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing\" Target=\"../drawings/drawing")
-                    .append(drawing.getDrawingIndex()).append(".xml\"/>");
+            relationships.add(new OpcRelationship(drawing.getRelationshipId(),
+                    "http://schemas.openxmlformats.org/officeDocument/2006/relationships/drawing",
+                    "../drawings/drawing" + drawing.getDrawingIndex() + ".xml"));
         }
         for (WorksheetHyperlink link : worksheetHyperlinks(sheet, drawing != null)) {
             if (link.getLink().isExternal()) {
-                rels.append("<Relationship Id=\"").append(link.getRelationshipId())
-                        .append("\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink\" Target=\"")
-                        .append(XmlUtils.xml(link.getLink().getTarget()))
-                        .append("\" TargetMode=\"External\"/>");
+                relationships.add(new OpcRelationship(link.getRelationshipId(),
+                        "http://schemas.openxmlformats.org/officeDocument/2006/relationships/hyperlink",
+                        link.getLink().getTarget(),
+                        "External"));
             }
         }
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
-                + "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">"
-                + rels
-                + "</Relationships>";
+        return OpcRelationships.buildOpcRelationshipsXml(relationships);
     }
 
     private java.util.List<WorksheetHyperlink> worksheetHyperlinks(SheetModel sheet, boolean hasDrawing) {
@@ -444,16 +423,13 @@ class XlsxPackageBuilder {
     }
 
     private String drawingRelsXml(SheetDrawing drawing) {
-        StringBuilder rels = new StringBuilder();
+        java.util.List<OpcRelationship> relationships = new java.util.ArrayList<OpcRelationship>();
         for (EmbeddedImage image : drawing.getImages()) {
-            rels.append("<Relationship Id=\"").append(image.getRelationshipId())
-                    .append("\" Type=\"http://schemas.openxmlformats.org/officeDocument/2006/relationships/image\" Target=\"../media/")
-                    .append(image.getMediaPath()).append("\"/>");
+            relationships.add(new OpcRelationship(image.getRelationshipId(),
+                    "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image",
+                    "../media/" + image.getMediaPath()));
         }
-        return "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?>"
-                + "<Relationships xmlns=\"http://schemas.openxmlformats.org/package/2006/relationships\">"
-                + rels
-                + "</Relationships>";
+        return OpcRelationships.buildOpcRelationshipsXml(relationships);
     }
 
     private String mediaExtension(ImageAsset asset) {

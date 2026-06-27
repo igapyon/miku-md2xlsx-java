@@ -105,11 +105,11 @@ class MikuMd2xlsxCoreTest {
         assertEquals(Arrays.asList(
                 "[Content_Types].xml",
                 "_rels/.rels",
-                "xl/workbook.xml",
+                "docProps/app.xml",
+                "docProps/core.xml",
                 "xl/_rels/workbook.xml.rels",
                 "xl/styles.xml",
-                "docProps/core.xml",
-                "docProps/app.xml",
+                "xl/workbook.xml",
                 "xl/worksheets/sheet1.xml"), zipEntryNames(first));
     }
 

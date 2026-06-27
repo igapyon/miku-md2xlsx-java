@@ -209,3 +209,6 @@
   Markdown row parsing, heading-mode sheet splitting, internal hyperlink
   normalization, XLSX image size reading, and reusable Markdown regex patterns
   from the larger builder/helper classes.
+- Followed upstream Node `miku-md2xlsx` `0.6.5` package-layer changes by
+  vendoring `miku-ms-office-core-java` `0.5.1` for shared ZIP/OPC/XML helpers
+  and updating deterministic ZIP entry-order coverage to the shared core order.

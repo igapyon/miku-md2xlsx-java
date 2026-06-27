@@ -241,3 +241,22 @@ Open parity follow-ups are tracked in `TODO.md` and
 - Verified the current release-readiness slice with `mvn package`, jar
   `--help`, jar `--version` returning `0.5.0`, and conversion of
   `xlsx2md-basic-sample01.md` to `target/verification-basic.xlsx`.
+
+## 2026-06-28 Upstream 0.6.5 Package-Core Follow-Up
+
+- Fetched upstream Node `miku-md2xlsx` and confirmed `origin/devel` advanced
+  from `v0.5.0` to `v0.6.5`.
+- Upstream package writing now uses vendored `miku-ms-office-core` `0.5.1`
+  instead of the previous local `src/ts/zip-io.ts` writer.
+- Updated Java runtime version to `0.6.5` and vendored the
+  `miku-ms-office-core-java` `0.5.1` release jar under
+  `vendor/miku-ms-office-core-java/`, following the `miku-xlsx2md-java`
+  same-layer pattern.
+- Replaced local ZIP writing and OPC relationship/content-type XML assembly in
+  `XlsxPackageBuilder` with shared Office core helpers while keeping XLSX
+  worksheet, drawing, style, merge, hyperlink, and rich-text semantics local.
+- Updated deterministic ZIP entry-order coverage to the shared Office core's
+  stable path ordering.
+- Maven unpacks the vendored Office core jar during `generate-sources`, so
+  release builds do not depend on Maven repository publication for the shared
+  core.
