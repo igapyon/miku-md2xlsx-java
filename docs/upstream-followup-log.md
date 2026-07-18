@@ -282,3 +282,24 @@ Open parity follow-ups are tracked in `TODO.md` and
 - Verification: `mvn test` and `mvn package` pass 84 tests; the packaged jar
   reports `0.9.0`, renders `--help`, converts the basic xlsx2md fixture with
   `--input-dialect miku-xlsx2md`, and converts README with `--template`.
+
+## 2026-07-18 Upstream 0.9.5 Office Core Follow-Up
+
+- Fetched upstream Node `miku-md2xlsx` and compared `v0.9.0..v0.9.5` at
+  upstream commit `2b2e79d`.
+- Confirmed Node `miku-md2xlsx` now vendors `miku-ms-office-core` `0.6.0` and
+  retains its product-local `xlsx-xml.ts` helper for XLSX-specific XML text,
+  rich-text, and column-name behavior.
+- Updated the Java runtime version to `0.9.5` and replaced the vendored
+  `miku-ms-office-core-java` `0.5.1` jar with the published `0.6.0` release
+  jar, SHA-256
+  `d25392727d9449e5001b9024b888f0ce09962c9fb977c18613731f37027b0a77`.
+- Retained product-local `XmlUtils` to preserve direct correspondence with
+  upstream `xlsx-xml.ts`; shared core continues to own ZIP/OPC plumbing and
+  generic XML helpers.
+- Expanded the supplementary Unicode regression to cover the XML 1.0 valid
+  boundaries and rejection of isolated surrogates, `U+FFFE`, and `U+FFFF`.
+- Verification: `mvn clean package` passes all 84 tests and creates the
+  `0.9.5` runtime jar, sources jar, and distribution zip. The packaged jar
+  reports `0.9.5`, renders `--help`, converts the representative xlsx2md
+  fixture, and contains the `0.6.0` code-point-aware `XmlHelper` implementation.

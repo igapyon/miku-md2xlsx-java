@@ -35,7 +35,7 @@
 | `tableStyle: plain` body-cell role | `MikuMd2xlsxCoreTest.appliesPlainTableStyleToBodyCells` | Covered |
 | XML escaping and inline text `xml:space` behavior | `MikuMd2xlsxCoreTest.followsUpstreamXmlEscapingAndInlineTextRules` | Covered |
 | Column names beyond `Z` | `MikuMd2xlsxCoreTest.writesColumnNamesBeyondZLikeUpstream` | Covered |
-| Supplementary Unicode worksheet text | `MikuMd2xlsxCoreTest.preservesSupplementaryUnicodeCharactersInWorksheetText` | Covered |
+| Supplementary Unicode and XML 1.0 character boundaries in worksheet text | `MikuMd2xlsxCoreTest.preservesSupplementaryUnicodeCharactersInWorksheetText` | Covered |
 | XLSX template styles, theme, namespaces, cell styles, and rightmost-sheet reuse | `MikuMd2xlsxCoreTest.reusesTemplateStylesThemeAndRightmostSheet` | Covered |
 | miku-xlsx2md dialect sheet names and table anchors | `MikuMd2xlsxCoreTest.restoresXlsx2mdSheetNamesAndAnchoredTables` | Covered |
 | malformed miku-xlsx2md structural markers | `MikuMd2xlsxCoreTest.rejectsMalformedXlsx2mdMarkers` | Covered |

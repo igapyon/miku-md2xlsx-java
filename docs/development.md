@@ -29,7 +29,7 @@ parts.
 ```sh
 mvn test
 mvn package
-java -jar target/miku-md2xlsx-java-0.9.0.jar README.md --out README.xlsx
+java -jar target/miku-md2xlsx-java-0.9.5.jar README.md --out README.xlsx
 ```
 
 ## Release Assets

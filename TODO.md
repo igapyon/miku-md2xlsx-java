@@ -215,3 +215,6 @@
 - Followed upstream Node `v0.7.0` through `v0.9.0`: added template-assisted
   XLSX generation, supplementary Unicode preservation, and the early-access
   `miku-xlsx2md` input dialect for exact sheet names and table anchors.
+- Followed upstream Node `v0.9.5`: updated the runtime and vendored
+  `miku-ms-office-core-java` to `0.6.0`, retaining product-local XLSX XML
+  generation and adding explicit XML 1.0 boundary coverage.

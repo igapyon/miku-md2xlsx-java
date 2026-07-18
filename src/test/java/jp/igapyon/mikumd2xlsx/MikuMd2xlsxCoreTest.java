@@ -1110,15 +1110,20 @@ class MikuMd2xlsxCoreTest {
 
     @Test
     void preservesSupplementaryUnicodeCharactersInWorksheetText() throws IOException {
+        String validBoundaries = "\uD7FF\uE000\uFFFD"
+                + new String(Character.toChars(0x10000))
+                + new String(Character.toChars(0x10ffff));
         String invalidCharacters = "before" + Character.toString((char) 0xd800) + "middle"
                 + Character.toString((char) 0xdc00)
                 + Character.toString((char) 0xfffe)
                 + Character.toString((char) 0xffff) + "after";
         byte[] xlsx = new MikuMd2xlsxCore().md2xlsx(
                 "| kind | value |\n| --- | --- |\n| Unicode | 😀 🐇 𠮷野家 |\n"
+                        + "| Boundaries | " + validBoundaries + " |\n"
                         + "| Invalid | " + invalidCharacters + " |\n");
         String worksheet = zipEntry(xlsx, "xl/worksheets/sheet1.xml");
         assertTrue(worksheet.contains("😀 🐇 𠮷野家"));
+        assertTrue(worksheet.contains(validBoundaries));
         assertTrue(worksheet.contains("beforemiddleafter"));
     }
 

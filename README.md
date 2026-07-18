@@ -38,22 +38,22 @@ The project source and target compatibility are fixed to Java 1.8.
 
 ```sh
 mvn package
-java -jar target/miku-md2xlsx-java-0.9.0.jar README.md --out README.xlsx
+java -jar target/miku-md2xlsx-java-0.9.5.jar README.md --out README.xlsx
 ```
 
 ## Command Form
 
 ```sh
-java -jar target/miku-md2xlsx-java-0.9.0.jar <input.md> --out <output.xlsx> [options]
+java -jar target/miku-md2xlsx-java-0.9.5.jar <input.md> --out <output.xlsx> [options]
 ```
 
 Examples:
 
 ```sh
-java -jar target/miku-md2xlsx-java-0.9.0.jar sample.md --out sample.xlsx
-java -jar target/miku-md2xlsx-java-0.9.0.jar sample.md --out sample.xlsx --template template.xlsx
-java -jar target/miku-md2xlsx-java-0.9.0.jar book.md --out book.xlsx --sheet-mode heading
-java -jar target/miku-md2xlsx-java-0.9.0.jar exported.md --out restored.xlsx --input-dialect miku-xlsx2md
+java -jar target/miku-md2xlsx-java-0.9.5.jar sample.md --out sample.xlsx
+java -jar target/miku-md2xlsx-java-0.9.5.jar sample.md --out sample.xlsx --template template.xlsx
+java -jar target/miku-md2xlsx-java-0.9.5.jar book.md --out book.xlsx --sheet-mode heading
+java -jar target/miku-md2xlsx-java-0.9.5.jar exported.md --out restored.xlsx --input-dialect miku-xlsx2md
 ```
 
 ## Options
