@@ -120,6 +120,12 @@
   runtime parity work is complete.
 - Current slice verified with `mvn test`, `mvn package`, jar `--help`, jar
   `--version`, and representative fixture conversion.
+- Upstream `v0.7.0` template-assisted generation, including template styles,
+  themes, worksheet settings, cell styles, and rightmost-sheet reuse.
+- Upstream `v0.8.0` supplementary Unicode text preservation and template
+  worksheet namespace compatibility.
+- Upstream `v0.9.0` early-access `miku-xlsx2md` input dialect for exact sheet
+  names, table anchors, and malformed-marker diagnostics.
 
 ## Pending
 
@@ -139,7 +145,7 @@ Run:
 ```sh
 mvn test
 mvn package
-java -jar target/miku-md2xlsx-java-0.6.5.jar --help
-java -jar target/miku-md2xlsx-java-0.6.5.jar --version
-java -jar target/miku-md2xlsx-java-0.6.5.jar src/test/resources/fixtures/from-xlsx2md/xlsx2md-basic-sample01.md --out target/verification-basic.xlsx --sheet-mode heading --sheet-heading-depth 2
+java -jar target/miku-md2xlsx-java-0.9.0.jar --help
+java -jar target/miku-md2xlsx-java-0.9.0.jar --version
+java -jar target/miku-md2xlsx-java-0.9.0.jar src/test/resources/fixtures/from-xlsx2md/xlsx2md-basic-sample01.md --out target/verification-basic.xlsx --input-dialect miku-xlsx2md
 ```

@@ -1,7 +1,5 @@
 package jp.igapyon.mikumd2xlsx.core;
 
-import jp.igapyon.mikumsofficecore.XmlHelper;
-
 final class XmlUtils {
     private XmlUtils() {
     }
@@ -10,11 +8,28 @@ final class XmlUtils {
         if (value == null) {
             return "";
         }
-        return XmlHelper.escapeXmlAttribute(value == null ? "" : value);
+        return sanitizeXmlText(value == null ? "" : value)
+                .replace("&", "&amp;")
+                .replace("<", "&lt;")
+                .replace(">", "&gt;")
+                .replace("\"", "&quot;")
+                .replace("'", "&apos;");
     }
 
     static String sanitizeXmlText(String value) {
-        return XmlHelper.sanitizeXmlText(value == null ? "" : value);
+        String source = value == null ? "" : value;
+        StringBuilder sanitized = new StringBuilder();
+        for (int offset = 0; offset < source.length();) {
+            int codePoint = source.codePointAt(offset);
+            if (codePoint == 0x09 || codePoint == 0x0a || codePoint == 0x0d
+                    || (codePoint >= 0x20 && codePoint <= 0xd7ff)
+                    || (codePoint >= 0xe000 && codePoint <= 0xfffd)
+                    || (codePoint >= 0x10000 && codePoint <= 0x10ffff)) {
+                sanitized.appendCodePoint(codePoint);
+            }
+            offset += Character.charCount(codePoint);
+        }
+        return sanitized.toString();
     }
 
     static String inlineTextXml(String value) {

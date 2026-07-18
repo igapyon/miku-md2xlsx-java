@@ -46,6 +46,9 @@ public class MikuMd2xlsxCli {
             Path inputPath = Paths.get(options.inputPath);
             String markdown = new String(Files.readAllBytes(inputPath), StandardCharsets.UTF_8);
             options.convertOptions.setImageLoader(createImageLoader(inputPath));
+            if (options.templatePath != null) {
+                options.convertOptions.setTemplateXlsx(Files.readAllBytes(Paths.get(options.templatePath)));
+            }
             byte[] workbook = new MikuMd2xlsxCore().md2xlsx(markdown, options.convertOptions);
             Path outPath = Paths.get(options.outPath);
             Path parent = outPath.toAbsolutePath().getParent();
@@ -75,11 +78,26 @@ public class MikuMd2xlsxCli {
                 + "  java -jar target/miku-md2xlsx-java-" + MikuMd2xlsxCore.VERSION + ".jar --help\n"
                 + "  java -jar target/miku-md2xlsx-java-" + MikuMd2xlsxCore.VERSION + ".jar --version\n"
                 + "\n"
-                + "Arguments:\n"
+                + "Default behavior:\n"
+                + "  The input file is read as UTF-8 Markdown. The output workbook is written to\n"
+                + "  --out. Parent directories for --out are created when missing.\n"
+                + "\n"
+                + "Inputs:\n"
                 + "  <input.md>                Input Markdown file path\n"
+                + "\n"
+                + "Outputs:\n"
+                + "  --out <file> is the generated Excel .xlsx workbook.\n"
+                + "\n"
+                + "Overwrite behavior:\n"
+                + "  Existing --out files are overwritten.\n"
+                + "\n"
+                + "Exit codes:\n"
+                + "  0 success, --help, or --version; 1 conversion failure; 2 invalid usage\n"
                 + "\n"
                 + "Options:\n"
                 + "  --out <file>              Output .xlsx path\n"
+                + "  --template <file>         Use a template .xlsx as the sheet-format source\n"
+                + "  --input-dialect <name>    markdown or miku-xlsx2md (default: markdown)\n"
                 + "  --sheet-mode <mode>       single or heading (default: single)\n"
                 + "  --sheet-heading-depth <n> Heading depth for sheet splits: 1 or 2 (default: 1)\n"
                 + "  --title <value>           Workbook title or first sheet name\n"
@@ -106,6 +124,18 @@ public class MikuMd2xlsxCli {
                 + "    [←M←] extends a merge to the left, and [↑M↑] extends a merge upward.\n"
                 + "  - A cell containing a single Markdown link is emitted as an Excel hyperlink\n"
                 + "    when the target can be represented by Excel.\n"
+                + "\n"
+                + "Template mode notes:\n"
+                + "  - Generated sheets overwrite matching template sheets. Additional sheets\n"
+                + "    reuse the rightmost template sheet as their formatting base.\n"
+                + "  - Styles, theme parts, and supported worksheet settings are reused; existing\n"
+                + "    template values, formulas, charts, drawings, and tables are not preserved.\n"
+                + "\n"
+                + "miku-xlsx2md dialect notes:\n"
+                + "  - --input-dialect miku-xlsx2md restores Sheet and Table markers emitted by\n"
+                + "    miku-xlsx2md, including exact sheet names and table anchors.\n"
+                + "  - Early access: this input dialect rejects malformed structural markers.\n"
+                + "  - It cannot be combined with --sheet-mode or --sheet-heading-depth.\n"
                 + "\n"
                 + "Sheet mode notes:\n"
                 + "  - single: create one worksheet from the whole Markdown document.\n"

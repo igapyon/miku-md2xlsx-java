@@ -20,7 +20,7 @@ class MikuMd2xlsxCliTest {
     void printsVersion() {
         CliRun run = runCli("--version");
         assertEquals(0, run.exitCode);
-        assertEquals("0.6.5\n", run.out);
+        assertEquals("0.9.0\n", run.out);
         assertEquals("", run.err);
     }
 
@@ -30,16 +30,23 @@ class MikuMd2xlsxCliTest {
         String help = run.out;
         assertEquals(0, run.exitCode);
         assertEquals("", run.err);
-        assertTrue(help.contains("miku-md2xlsx 0.6.5"));
+        assertTrue(help.contains("miku-md2xlsx 0.9.0"));
         assertTrue(help.contains("miku-md2xlsx converts a Markdown file into an Excel .xlsx workbook."));
         assertTrue(help.contains("Usage:"));
-        assertTrue(help.contains("Arguments:"));
+        assertTrue(help.contains("Inputs:"));
+        assertTrue(help.contains("Outputs:"));
+        assertTrue(help.contains("Overwrite behavior:"));
+        assertTrue(help.contains("Exit codes:"));
         assertTrue(help.contains("--out <file>"));
         assertTrue(help.contains("--version"));
         assertTrue(help.contains("Examples:"));
         assertTrue(help.contains("Markdown handling notes:"));
         assertTrue(help.contains("Table cell values are written as strings."));
         assertTrue(help.contains("Sheet mode notes:"));
+        assertTrue(help.contains("Template mode notes:"));
+        assertTrue(help.contains("miku-xlsx2md dialect notes:"));
+        assertTrue(help.contains("--template <file>"));
+        assertTrue(help.contains("--input-dialect <name>"));
     }
 
     @Test
@@ -125,6 +132,21 @@ class MikuMd2xlsxCliTest {
         assertEquals(2, run.exitCode);
         assertEquals("--table-style must be plain or bordered.\n", run.err);
         assertEquals("", run.out);
+    }
+
+    @Test
+    void rejectsInvalidInputDialect() {
+        CliRun run = runCli("sample.md", "--out", "sample.xlsx", "--input-dialect", "invalid");
+        assertEquals(2, run.exitCode);
+        assertEquals("--input-dialect must be markdown or miku-xlsx2md.\n", run.err);
+    }
+
+    @Test
+    void rejectsGenericSheetOptionsWithXlsx2mdDialect() {
+        CliRun run = runCli("sample.md", "--out", "sample.xlsx", "--input-dialect", "miku-xlsx2md",
+                "--sheet-mode", "heading");
+        assertEquals(2, run.exitCode);
+        assertTrue(run.err.contains("cannot be combined with --sheet-mode or --sheet-heading-depth"));
     }
 
     @Test

@@ -3,12 +3,14 @@
 | Upstream file | Java class / package | Status |
 | --- | --- | --- |
 | `src/ts/core.ts` | `jp.igapyon.mikumd2xlsx.core.MikuMd2xlsxCore` | API shape ported for `markdownToXlsxModel`, `workbookModelToXlsx`, and `md2xlsx` |
-| `src/ts/types.ts` | `CellModel`, `HyperlinkModel`, `ImageAsset`, `ImageRefModel`, `RichTextRun`, `RowModel`, `SheetModel`, `WorkbookModel`, `Md2XlsxOptions` | Model fields ported, including image assets, image refs, rich text runs, hyperlinks, column hints, row kinds, cell style roles, and caller-supplied `imageAssets` |
+| `src/ts/types.ts` | `CellModel`, `HyperlinkModel`, `ImageAsset`, `ImageRefModel`, `RichTextRun`, `RowModel`, `SheetModel`, `WorkbookModel`, `Md2XlsxOptions` | Model fields ported, including `imageAssets`, `templateXlsx`, and `inputDialect` |
 | `src/ts/workbook-model.ts`, `sheet-builder.ts` | `MarkdownWorkbookBuilder` | Initial single/heading sheet behavior, preface rows, title handling, sheet name handling, and xlsx2md-style internal hyperlink target normalization ported |
 | `src/ts/markdown-text.ts`, `markdown-inline.ts`, `markdown-blocks.ts`, `markdown-table-compat.ts` | `MarkdownText`, `MarkdownWorkbookBuilder` | Text/table parsing with escaped pipe, line break, inline code, autolink, task-list, link/image fallback text, single-tilde strike, and HTML entity handling |
 | `src/ts/xlsx-writer.ts` | `XlsxPackageBuilder`, `jp.igapyon.mikumsofficecore` | Basic workbook package ported; ZIP/OPC/XML package helpers follow upstream `miku-ms-office-core` 0.5.1 |
 | `src/ts/xlsx-worksheet.ts` | `XlsxPackageBuilder#worksheetXml` | Dimensions, column hints, inline strings, hyperlinks, merges, and drawing relationships ported |
-| `src/ts/xlsx-xml.ts` | `XmlUtils`, `jp.igapyon.mikumsofficecore.XmlHelper` | XML text sanitization and escaping use shared Office core; inline text XML and column naming remain local |
+| `src/ts/xlsx-xml.ts` | `XmlUtils` | XML text sanitization, supplementary Unicode preservation, escaping, inline text XML, and column naming ported |
+| `src/ts/xlsx-template.ts` | `XlsxTemplate`, `XlsxPackageBuilder` | Template styles, theme, worksheet settings, per-cell styles, and rightmost-sheet reuse ported |
+| `src/ts/xlsx2md-dialect-parser.ts`, `xlsx2md-dialect.ts` | `Xlsx2mdDialect` | Early-access sheet marker, table anchor, validation, and overlay behavior ported |
 | `src/ts/xlsx-styles.ts` | `XlsxPackageBuilder#stylesXml`, `XlsxPackageBuilder#styleIndex` | Style indexes and style sheet shape ported |
 | `src/ts/xlsx-drawing*.ts`, `xlsx-media.ts`, `xlsx-sheet-drawings.ts`, `xlsx-image-preview.ts`, `image-size.ts` | `ImageRefModel`, `ImageAsset`, `XlsxPackageBuilder` | Media parts, drawing relationships, 3-column anchors, image-size-derived preview rows, and reserved blank preview rows ported |
 | `src/ts/xlsx-hyperlinks.ts`, `markdown-links.ts` | `HyperlinkModel`, `MarkdownText`, `XlsxPackageBuilder` | External/internal hyperlink support and worksheet relationship IDs ported |

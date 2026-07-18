@@ -40,7 +40,7 @@ class SheetSplitter {
         } else if (!hasSplit) {
             sheets.add(new SheetModel(uniqueSheetName(currentName, usedNames), prefaceRows));
         }
-        return new WorkbookModel(sheets, imageAssets);
+        return new WorkbookModel(sheets, imageAssets, options.getTemplateXlsx());
     }
 
     private int headingStyleDepth(String styleRole) {

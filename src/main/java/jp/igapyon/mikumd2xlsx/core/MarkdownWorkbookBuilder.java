@@ -10,6 +10,10 @@ class MarkdownWorkbookBuilder {
     private final InternalHyperlinkNormalizer hyperlinkNormalizer = new InternalHyperlinkNormalizer();
 
     WorkbookModel build(String markdown, Md2XlsxOptions options) {
+        if ("miku-xlsx2md".equals(options.getInputDialect())) {
+            WorkbookModel dialectWorkbook = new Xlsx2mdDialect().build(markdown == null ? "" : markdown, options);
+            return hyperlinkNormalizer.normalize(dialectWorkbook);
+        }
         List<RowModel> rows = rowParser.parseRows(markdown == null ? "" : markdown, options);
         List<ImageAsset> imageAssets = collectImageAssets(rows, options);
         WorkbookModel workbook;
@@ -17,7 +21,7 @@ class MarkdownWorkbookBuilder {
             workbook = sheetSplitter.splitByHeading(rows, options, imageAssets);
         } else {
             String name = options.getTitle() == null ? "Sheet1" : MarkdownText.sheetName(options.getTitle());
-            workbook = new WorkbookModel(Arrays.asList(new SheetModel(name, rows)), imageAssets);
+            workbook = new WorkbookModel(Arrays.asList(new SheetModel(name, rows)), imageAssets, options.getTemplateXlsx());
         }
         return hyperlinkNormalizer.normalize(workbook);
     }

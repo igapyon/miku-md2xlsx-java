@@ -35,6 +35,10 @@
 | `tableStyle: plain` body-cell role | `MikuMd2xlsxCoreTest.appliesPlainTableStyleToBodyCells` | Covered |
 | XML escaping and inline text `xml:space` behavior | `MikuMd2xlsxCoreTest.followsUpstreamXmlEscapingAndInlineTextRules` | Covered |
 | Column names beyond `Z` | `MikuMd2xlsxCoreTest.writesColumnNamesBeyondZLikeUpstream` | Covered |
+| Supplementary Unicode worksheet text | `MikuMd2xlsxCoreTest.preservesSupplementaryUnicodeCharactersInWorksheetText` | Covered |
+| XLSX template styles, theme, namespaces, cell styles, and rightmost-sheet reuse | `MikuMd2xlsxCoreTest.reusesTemplateStylesThemeAndRightmostSheet` | Covered |
+| miku-xlsx2md dialect sheet names and table anchors | `MikuMd2xlsxCoreTest.restoresXlsx2mdSheetNamesAndAnchoredTables` | Covered |
+| malformed miku-xlsx2md structural markers | `MikuMd2xlsxCoreTest.rejectsMalformedXlsx2mdMarkers` | Covered |
 | Style indexes and styles XML shape | `MikuMd2xlsxCoreTest.writesUpstreamStyleIndexesAndStyleSheetShape` | Covered |
 | Deterministic ZIP bytes and entry order | `MikuMd2xlsxCoreTest.writesDeterministicZipBytesAndEntryOrder` | Covered |
 | Heading split at depth 1 | `MikuMd2xlsxCoreTest.splitsHeadingModeAtDepthOneAndKeepsTitleRow` | Covered |
@@ -75,6 +79,7 @@
 | CLI file conversion | `MikuMd2xlsxCliTest.convertsFile` | Covered |
 | CLI validation errors | `MikuMd2xlsxCliTest` validation methods | Covered |
 | CLI runtime I/O errors | `MikuMd2xlsxCliTest.reportsRuntimeIoErrors` | Covered |
+| CLI input dialect validation and generic sheet-option exclusion | `MikuMd2xlsxCliTest.rejectsInvalidInputDialect`, `rejectsGenericSheetOptionsWithXlsx2mdDialect` | Covered |
 | broader `tests/md2xlsx-from-xlsx2md-*.test.js` fixture parity | Not yet mapped | Pending |
 | formula, image sizing, and full fixture parity | Not yet mapped | Pending |
 

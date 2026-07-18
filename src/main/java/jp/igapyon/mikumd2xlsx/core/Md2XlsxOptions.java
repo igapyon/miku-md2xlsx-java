@@ -6,6 +6,8 @@ public class Md2XlsxOptions {
     private String title;
     private String tableStyle = "bordered";
     private boolean headerRow = true;
+    private String inputDialect = "markdown";
+    private byte[] templateXlsx;
     private java.util.List<ImageAsset> imageAssets = java.util.Collections.emptyList();
     private ImageLoader imageLoader;
 
@@ -60,6 +62,25 @@ public class Md2XlsxOptions {
 
     public void setHeaderRow(boolean headerRow) {
         this.headerRow = headerRow;
+    }
+
+    public String getInputDialect() {
+        return inputDialect;
+    }
+
+    public void setInputDialect(String inputDialect) {
+        if (!"markdown".equals(inputDialect) && !"miku-xlsx2md".equals(inputDialect)) {
+            throw new IllegalArgumentException("inputDialect must be markdown or miku-xlsx2md.");
+        }
+        this.inputDialect = inputDialect;
+    }
+
+    public byte[] getTemplateXlsx() {
+        return templateXlsx == null ? null : templateXlsx.clone();
+    }
+
+    public void setTemplateXlsx(byte[] templateXlsx) {
+        this.templateXlsx = templateXlsx == null ? null : templateXlsx.clone();
     }
 
     public java.util.List<ImageAsset> getImageAssets() {

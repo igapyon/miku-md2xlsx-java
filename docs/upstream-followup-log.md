@@ -260,3 +260,25 @@ Open parity follow-ups are tracked in `TODO.md` and
 - Maven unpacks the vendored Office core jar during `generate-sources`, so
   release builds do not depend on Maven repository publication for the shared
   core.
+
+## 2026-07-18 Upstream 0.7.0-0.9.0 Follow-Up
+
+- Fetched upstream Node `miku-md2xlsx` and compared `v0.6.5..v0.9.0` at
+  upstream commit `2d387ce`.
+- `v0.7.0` added template-assisted XLSX generation and CLI `--template`.
+  Java now carries `templateXlsx` through `Md2XlsxOptions` and `WorkbookModel`,
+  and `XlsxTemplate` reuses styles, theme, worksheet settings, template cell
+  styles, and the rightmost template sheet for additional generated sheets.
+- `v0.8.0` preserved supplementary Unicode characters and retained template
+  worksheet namespaces. Java now sanitizes XML by Unicode code point at the
+  local XML boundary because the vendored Office core 0.5.1 Java helper drops
+  surrogate pairs.
+- `v0.9.0` added the early-access `miku-xlsx2md` input dialect. Java now ports
+  `--input-dialect`, exact `Sheet:` names, `Table: N (A1-C4)` anchored table
+  overlays, malformed-marker diagnostics, and exclusion with generic sheet
+  split options.
+- Updated the Java runtime version to `0.9.0`, CLI help, README, upstream class
+  and test mappings, snapshot record, and focused regression coverage.
+- Verification: `mvn test` and `mvn package` pass 84 tests; the packaged jar
+  reports `0.9.0`, renders `--help`, converts the basic xlsx2md fixture with
+  `--input-dialect miku-xlsx2md`, and converts README with `--template`.

@@ -2,7 +2,8 @@
 
 ## Checked References
 
-- miku-soft developer skill: local installed skill checked on 2026-05-18.
+- miku-soft developer skill: local installed skill checked on 2026-07-18 at
+  commit `9b05e3b1214e657a378781f28f5de6261f5d3e16`.
 - Main workflow: `references/30-java-straight-conversion-workflow.md`.
 - Upstream Node repository: `https://github.com/igapyon/miku-md2xlsx`.
 - Same-layer sister reference: `https://github.com/igapyon/miku-md2docx-java`.
@@ -28,7 +29,7 @@ parts.
 ```sh
 mvn test
 mvn package
-java -jar target/miku-md2xlsx-java-0.6.5.jar README.md --out README.xlsx
+java -jar target/miku-md2xlsx-java-0.9.0.jar README.md --out README.xlsx
 ```
 
 ## Release Assets

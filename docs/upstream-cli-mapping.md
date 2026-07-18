@@ -4,6 +4,8 @@
 | --- | --- | --- |
 | `<input.md>` | `<input.md>` | Ported |
 | `--out <file>` | `--out <file>` | Ported |
+| `--template <file>` | `--template <file>` | Ported |
+| `--input-dialect <name>` | `--input-dialect <name>` | Ported |
 | `--sheet-mode <mode>` | `--sheet-mode <mode>` | Ported |
 | `--sheet-heading-depth <n>` | `--sheet-heading-depth <n>` | Ported |
 | `--title <value>` | `--title <value>` | Ported |
@@ -15,7 +17,7 @@
 Java command form:
 
 ```sh
-java -jar target/miku-md2xlsx-java-0.6.5.jar <input.md> --out <output.xlsx> [options]
+java -jar target/miku-md2xlsx-java-0.9.0.jar <input.md> --out <output.xlsx> [options]
 ```
 
 Known differences:
@@ -30,3 +32,7 @@ Known differences:
   sizing, and generated workbook XML.
 - Byte-level parity with the Node.js runtime is not a goal; representative
   tests cover semantic workbook output.
+- Template mode reuses formatting-related parts but intentionally replaces
+  template workbook content.
+- `miku-xlsx2md` input dialect is early access and restores emitted sheet names
+  and table anchors; it cannot be combined with generic sheet split options.

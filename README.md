@@ -38,26 +38,29 @@ The project source and target compatibility are fixed to Java 1.8.
 
 ```sh
 mvn package
-java -jar target/miku-md2xlsx-java-0.6.5.jar README.md --out README.xlsx
+java -jar target/miku-md2xlsx-java-0.9.0.jar README.md --out README.xlsx
 ```
 
 ## Command Form
 
 ```sh
-java -jar target/miku-md2xlsx-java-0.6.5.jar <input.md> --out <output.xlsx> [options]
+java -jar target/miku-md2xlsx-java-0.9.0.jar <input.md> --out <output.xlsx> [options]
 ```
 
 Examples:
 
 ```sh
-java -jar target/miku-md2xlsx-java-0.6.5.jar sample.md --out sample.xlsx
-java -jar target/miku-md2xlsx-java-0.6.5.jar book.md --out book.xlsx --sheet-mode heading
-java -jar target/miku-md2xlsx-java-0.6.5.jar book.md --out book.xlsx --sheet-mode heading --sheet-heading-depth 2
+java -jar target/miku-md2xlsx-java-0.9.0.jar sample.md --out sample.xlsx
+java -jar target/miku-md2xlsx-java-0.9.0.jar sample.md --out sample.xlsx --template template.xlsx
+java -jar target/miku-md2xlsx-java-0.9.0.jar book.md --out book.xlsx --sheet-mode heading
+java -jar target/miku-md2xlsx-java-0.9.0.jar exported.md --out restored.xlsx --input-dialect miku-xlsx2md
 ```
 
 ## Options
 
 - `--out <file>`: output `.xlsx` path
+- `--template <file>`: use an existing `.xlsx` as the sheet-format source
+- `--input-dialect <name>`: `markdown` or early-access `miku-xlsx2md`
 - `--sheet-mode <mode>`: `single` or `heading`
 - `--sheet-heading-depth <n>`: `1` or `2`
 - `--title <value>`: sheet name in `single` mode, or the fallback sheet name
@@ -75,6 +78,21 @@ java -jar target/miku-md2xlsx-java-0.6.5.jar book.md --out book.xlsx --sheet-mod
 Use `--sheet-heading-depth 2` for miku-xlsx2md-style Markdown where the first
 level heading is the workbook title and second level headings represent
 worksheets.
+
+## Template Mode
+
+`--template` reuses template workbook styles, theme parts, and supported
+worksheet settings. Generated sheets replace matching template sheets; extra
+generated sheets reuse the rightmost template sheet as their formatting base.
+Existing template values, formulas, charts, drawings, tables, pivot data, and
+shared strings are not preserved as workbook content.
+
+## miku-xlsx2md Dialect
+
+`--input-dialect miku-xlsx2md` restores exact `## Sheet:` names and
+`### Table: N (A1-C4)` table anchors emitted by miku-xlsx2md. This early-access
+mode rejects malformed structural markers and cannot be combined with
+`--sheet-mode` or `--sheet-heading-depth`.
 
 ## Notes
 

@@ -5,8 +5,11 @@ import jp.igapyon.mikumd2xlsx.core.Md2XlsxOptions;
 class CliOptions {
     String inputPath;
     String outPath;
+    String templatePath;
     boolean help;
     boolean version;
+    boolean sheetModeSpecified;
+    boolean sheetHeadingDepthSpecified;
     final Md2XlsxOptions convertOptions = new Md2XlsxOptions();
 
     static CliOptions parse(String[] args) {
@@ -21,9 +24,15 @@ class CliOptions {
                 return options;
             } else if ("--out".equals(arg)) {
                 options.outPath = requireValue(args, ++i, "--out");
+            } else if ("--template".equals(arg)) {
+                options.templatePath = requireValue(args, ++i, "--template");
+            } else if ("--input-dialect".equals(arg)) {
+                options.convertOptions.setInputDialect(readInputDialect(requireValue(args, ++i, "--input-dialect")));
             } else if ("--sheet-mode".equals(arg)) {
+                options.sheetModeSpecified = true;
                 options.convertOptions.setSheetMode(readSheetMode(requireValue(args, ++i, "--sheet-mode")));
             } else if ("--sheet-heading-depth".equals(arg)) {
+                options.sheetHeadingDepthSpecified = true;
                 options.convertOptions.setSheetHeadingDepth(readSheetHeadingDepth(requireValue(args, ++i, "--sheet-heading-depth")));
             } else if ("--title".equals(arg)) {
                 options.convertOptions.setTitle(requireValue(args, ++i, "--title"));
@@ -38,6 +47,10 @@ class CliOptions {
             } else {
                 throw new IllegalArgumentException("Unexpected argument: " + arg);
             }
+        }
+        if ("miku-xlsx2md".equals(options.convertOptions.getInputDialect())
+                && (options.sheetModeSpecified || options.sheetHeadingDepthSpecified)) {
+            throw new IllegalArgumentException("--input-dialect miku-xlsx2md cannot be combined with --sheet-mode or --sheet-heading-depth.");
         }
         return options;
     }
@@ -69,5 +82,11 @@ class CliOptions {
         }
         return value;
     }
-}
 
+    private static String readInputDialect(String value) {
+        if (!"markdown".equals(value) && !"miku-xlsx2md".equals(value)) {
+            throw new IllegalArgumentException("--input-dialect must be markdown or miku-xlsx2md.");
+        }
+        return value;
+    }
+}

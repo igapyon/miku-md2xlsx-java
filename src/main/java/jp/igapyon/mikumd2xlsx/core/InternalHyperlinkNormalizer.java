@@ -28,7 +28,7 @@ class InternalHyperlinkNormalizer {
             }
             sheets.add(new SheetModel(sheet.getName(), rows, sheet.getColumnHints()));
         }
-        return new WorkbookModel(sheets, workbook.getImageAssets());
+        return new WorkbookModel(sheets, workbook.getImageAssets(), workbook.getTemplateXlsx());
     }
 
     private HyperlinkModel normalizeInternalHyperlink(HyperlinkModel hyperlink, Set<String> sheetNames) {

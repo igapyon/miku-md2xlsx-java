@@ -1107,4 +1107,100 @@ class MikuMd2xlsxCoreTest {
                 (byte) 0xae, 0x42, 0x60, (byte) 0x82
         };
     }
+
+    @Test
+    void preservesSupplementaryUnicodeCharactersInWorksheetText() throws IOException {
+        String invalidCharacters = "before" + Character.toString((char) 0xd800) + "middle"
+                + Character.toString((char) 0xdc00)
+                + Character.toString((char) 0xfffe)
+                + Character.toString((char) 0xffff) + "after";
+        byte[] xlsx = new MikuMd2xlsxCore().md2xlsx(
+                "| kind | value |\n| --- | --- |\n| Unicode | 😀 🐇 𠮷野家 |\n"
+                        + "| Invalid | " + invalidCharacters + " |\n");
+        String worksheet = zipEntry(xlsx, "xl/worksheets/sheet1.xml");
+        assertTrue(worksheet.contains("😀 🐇 𠮷野家"));
+        assertTrue(worksheet.contains("beforemiddleafter"));
+    }
+
+    @Test
+    void restoresXlsx2mdSheetNamesAndAnchoredTables() throws IOException {
+        String markdown = "# Book: sample.xlsx\n\n"
+                + "## Sheet: Alpha\n\nintro\n\n"
+                + "### Table: 001 (B3-D5)\n\n"
+                + "| A | B | C |\n| --- | --- | --- |\n| one | merged | [←M←] |\n| two | [↑M↑] | [↑M↑] |\n\n"
+                + "## Sheet: 日本語\n\n### Table: 001 (A1-B2)\n\n"
+                + "| 項目 | 値 |\n| --- | --- |\n| 名前 | みく |\n";
+        Md2XlsxOptions options = new Md2XlsxOptions();
+        options.setInputDialect("miku-xlsx2md");
+        WorkbookModel workbook = new MikuMd2xlsxCore().markdownToXlsxModel(markdown, options);
+        assertEquals(Arrays.asList("Alpha", "日本語"), sheetNames(workbook));
+        assertEquals("A", workbook.getSheets().get(0).getRows().get(2).getCells().get(1).getValue());
+        assertTrue(!flattenedValues(workbook).contains("Book: sample.xlsx"));
+        Map<String, String> entries = XlsxTestSupport.readWorkbookXmlEntries(
+                new MikuMd2xlsxCore().workbookModelToXlsx(workbook));
+        assertEquals(Arrays.asList("C4:D5"), XlsxTestSupport.readWorksheetMergeRefs(entries, 1));
+        assertTrue(entries.get("xl/worksheets/sheet1.xml").contains("<dimension ref=\"A1:D5\"/>"));
+    }
+
+    @Test
+    void rejectsMalformedXlsx2mdMarkers() {
+        Md2XlsxOptions options = new Md2XlsxOptions();
+        options.setInputDialect("miku-xlsx2md");
+        try {
+            new MikuMd2xlsxCore().markdownToXlsxModel("## Sheet:\n\ntext\n", options);
+            throw new AssertionError("Expected malformed Sheet marker to fail.");
+        } catch (IllegalArgumentException ex) {
+            assertTrue(ex.getMessage().contains("Expected: ## Sheet: <name>"));
+        }
+        try {
+            new MikuMd2xlsxCore().markdownToXlsxModel("## Sheet: A\n\n### Table: 1 A1-B2\n", options);
+            throw new AssertionError("Expected malformed Table marker to fail.");
+        } catch (IllegalArgumentException ex) {
+            assertTrue(ex.getMessage().contains("Expected: ### Table: N (A1-C4)"));
+        }
+    }
+
+    @Test
+    void reusesTemplateStylesThemeAndRightmostSheet() throws IOException {
+        Md2XlsxOptions templateOptions = new Md2XlsxOptions();
+        templateOptions.setSheetMode("heading");
+        byte[] base = new MikuMd2xlsxCore().md2xlsx(
+                "# Template A\n\nTemplate-only A\n\n# Template B\n\nTemplate-only B", templateOptions);
+        jp.igapyon.mikumsofficecore.ZipReadResult read = jp.igapyon.mikumsofficecore.ZipPackage.readZipPackage(base);
+        java.util.List<jp.igapyon.mikumsofficecore.ZipEntryInput> templateEntries =
+                new java.util.ArrayList<jp.igapyon.mikumsofficecore.ZipEntryInput>();
+        for (jp.igapyon.mikumsofficecore.ZipEntry entry : read.getEntries()) {
+            byte[] data = entry.getData();
+            if ("xl/styles.xml".equals(entry.getPath())) {
+                data = new String(data, StandardCharsets.UTF_8).replace("Calibri", "TemplateFont")
+                        .getBytes(StandardCharsets.UTF_8);
+            } else if ("xl/worksheets/sheet1.xml".equals(entry.getPath())) {
+                data = new String(data, StandardCharsets.UTF_8)
+                        .replaceFirst("<worksheet\\b", "<worksheet xmlns:x14ac=\"http://schemas.microsoft.com/office/spreadsheetml/2009/9/ac\"")
+                        .replaceFirst("<sheetFormatPr\\b([^>]*)/>", "<sheetFormatPr$1 x14ac:dyDescent=\"0.2\"/>")
+                        .replaceFirst("<c r=\"A1\"[^>]*>", "<c r=\"A1\" t=\"inlineStr\" s=\"7\">")
+                        .getBytes(StandardCharsets.UTF_8);
+            } else if ("xl/worksheets/sheet2.xml".equals(entry.getPath())) {
+                data = new String(data, StandardCharsets.UTF_8)
+                        .replaceFirst("<c r=\"A1\"[^>]*>", "<c r=\"A1\" t=\"inlineStr\" s=\"8\">")
+                        .getBytes(StandardCharsets.UTF_8);
+            }
+            templateEntries.add(new jp.igapyon.mikumsofficecore.ZipEntryInput(entry.getPath(), data));
+        }
+        templateEntries.add(new jp.igapyon.mikumsofficecore.ZipEntryInput("xl/theme/theme1.xml",
+                "<a:theme xmlns:a=\"http://schemas.openxmlformats.org/drawingml/2006/main\" name=\"Template Theme\"/>"));
+        Md2XlsxOptions options = new Md2XlsxOptions();
+        options.setSheetMode("heading");
+        options.setTemplateXlsx(jp.igapyon.mikumsofficecore.ZipPackage.writeZipPackage(templateEntries));
+        byte[] output = new MikuMd2xlsxCore().md2xlsx(
+                "# Generated A\n\nBody A\n\n# Generated B\n\nBody B\n\n# Generated C\n\nBody C", options);
+        Map<String, String> entries = XlsxTestSupport.readWorkbookXmlEntries(output);
+        assertTrue(entries.get("xl/styles.xml").contains("TemplateFont"));
+        assertTrue(entries.get("xl/theme/theme1.xml").contains("Template Theme"));
+        assertTrue(entries.get("xl/worksheets/sheet1.xml").contains("x14ac:dyDescent=\"0.2\""));
+        assertEquals("7", XlsxTestSupport.readWorksheetCells(entries, 1).get(0).getAttributes().get("s"));
+        assertEquals("8", XlsxTestSupport.readWorksheetCells(entries, 2).get(0).getAttributes().get("s"));
+        assertEquals("8", XlsxTestSupport.readWorksheetCells(entries, 3).get(0).getAttributes().get("s"));
+        assertTrue(!entries.get("xl/worksheets/sheet1.xml").contains("Template-only A"));
+    }
 }

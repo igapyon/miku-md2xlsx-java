@@ -16,22 +16,30 @@ class XlsxPackageBuilder {
     private static final int MIN_IMAGE_PREVIEW_ROWS = 4;
     private static final int MAX_IMAGE_PREVIEW_ROWS = 24;
     private final XlsxImageSizeReader imageSizeReader = new XlsxImageSizeReader();
+    private final XlsxTemplate xlsxTemplate = new XlsxTemplate();
 
     byte[] build(WorkbookModel workbook) {
         WorkbookModel renderWorkbook = withReservedImagePreviewRows(workbook);
         java.util.List<SheetDrawing> drawings = collectSheetDrawings(renderWorkbook);
+        XlsxTemplate.TemplateParts template = xlsxTemplate.read(renderWorkbook.getTemplateXlsx());
         java.util.List<ZipEntryInput> entries = new java.util.ArrayList<ZipEntryInput>();
-        entries.add(new ZipEntryInput("[Content_Types].xml", contentTypes(renderWorkbook.getSheets().size(), drawings)));
+        if (template != null && template.hasTheme()) {
+            entries.add(new ZipEntryInput("xl/theme/theme1.xml", template.getTheme().getData()));
+        }
+        entries.add(new ZipEntryInput("[Content_Types].xml", contentTypes(renderWorkbook.getSheets().size(), drawings, template)));
         entries.add(new ZipEntryInput("_rels/.rels", rootRels()));
         entries.add(new ZipEntryInput("xl/workbook.xml", workbookXml(renderWorkbook)));
-        entries.add(new ZipEntryInput("xl/_rels/workbook.xml.rels", workbookRels(renderWorkbook.getSheets().size())));
-        entries.add(new ZipEntryInput("xl/styles.xml", stylesXml()));
+        entries.add(new ZipEntryInput("xl/_rels/workbook.xml.rels", workbookRels(renderWorkbook.getSheets().size(), template)));
+        entries.add(new ZipEntryInput("xl/styles.xml", template != null && template.getStylesXml() != null
+                ? template.getStylesXml() : stylesXml()));
         entries.add(new ZipEntryInput("docProps/core.xml", coreProps()));
         entries.add(new ZipEntryInput("docProps/app.xml", appProps(renderWorkbook.getSheets().size())));
         for (int i = 0; i < renderWorkbook.getSheets().size(); i++) {
             SheetModel sheet = renderWorkbook.getSheets().get(i);
             SheetDrawing drawing = drawingForSheet(drawings, i + 1);
-            entries.add(new ZipEntryInput("xl/worksheets/sheet" + (i + 1) + ".xml", worksheetXml(sheet, drawing)));
+            String generatedWorksheet = worksheetXml(sheet, drawing);
+            entries.add(new ZipEntryInput("xl/worksheets/sheet" + (i + 1) + ".xml",
+                    xlsxTemplate.applyWorksheet(template, generatedWorksheet, i + 1)));
             if (hasWorksheetRelationships(sheet, drawing)) {
                 entries.add(new ZipEntryInput("xl/worksheets/_rels/sheet" + (i + 1) + ".xml.rels", worksheetRelsXml(sheet, drawing)));
             }
@@ -46,7 +54,8 @@ class XlsxPackageBuilder {
         return ZipPackage.writeZipPackage(entries);
     }
 
-    private String contentTypes(int sheetCount, java.util.List<SheetDrawing> drawings) {
+    private String contentTypes(int sheetCount, java.util.List<SheetDrawing> drawings,
+            XlsxTemplate.TemplateParts template) {
         java.util.List<OpcContentTypeDefault> defaults = new java.util.ArrayList<OpcContentTypeDefault>();
         defaults.add(new OpcContentTypeDefault("rels", "application/vnd.openxmlformats-package.relationships+xml"));
         defaults.add(new OpcContentTypeDefault("xml", "application/xml"));
@@ -65,6 +74,10 @@ class XlsxPackageBuilder {
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet.main+xml"));
         overrides.add(new OpcContentTypeOverride("xl/styles.xml",
                 "application/vnd.openxmlformats-officedocument.spreadsheetml.styles+xml"));
+        if (template != null && template.hasTheme()) {
+            overrides.add(new OpcContentTypeOverride("xl/theme/theme1.xml",
+                    "application/vnd.openxmlformats-officedocument.theme+xml"));
+        }
         overrides.add(new OpcContentTypeOverride("docProps/core.xml",
                 "application/vnd.openxmlformats-package.core-properties+xml"));
         overrides.add(new OpcContentTypeOverride("docProps/app.xml",
@@ -105,7 +118,7 @@ class XlsxPackageBuilder {
                 + "</workbook>";
     }
 
-    private String workbookRels(int sheetCount) {
+    private String workbookRels(int sheetCount, XlsxTemplate.TemplateParts template) {
         java.util.List<OpcRelationship> relationships = new java.util.ArrayList<OpcRelationship>();
         for (int i = 0; i < sheetCount; i++) {
             relationships.add(new OpcRelationship("rId" + (i + 1),
@@ -115,6 +128,11 @@ class XlsxPackageBuilder {
         relationships.add(new OpcRelationship("rId" + (sheetCount + 1),
                 "http://schemas.openxmlformats.org/officeDocument/2006/relationships/styles",
                 "styles.xml"));
+        if (template != null && template.hasTheme()) {
+            relationships.add(new OpcRelationship("rId" + (sheetCount + 2),
+                    "http://schemas.openxmlformats.org/officeDocument/2006/relationships/theme",
+                    "theme/theme1.xml"));
+        }
         return OpcRelationships.buildOpcRelationshipsXml(relationships);
     }
 
@@ -372,7 +390,7 @@ class XlsxPackageBuilder {
             }
             sheets.add(new SheetModel(sheet.getName(), rows, sheet.getColumnHints()));
         }
-        return new WorkbookModel(sheets, workbook.getImageAssets());
+        return new WorkbookModel(sheets, workbook.getImageAssets(), workbook.getTemplateXlsx());
     }
 
     private int previewRowsForRow(RowModel row, java.util.Map<String, ImageAsset> assets) {
