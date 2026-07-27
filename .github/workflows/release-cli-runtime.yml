@@ -69,7 +69,16 @@ jobs:
       - name: Verify CLI runtime asset
         run: |
           set -euo pipefail
-          java -jar release-assets/${RELEASE_ARTIFACT_ID}-[0-9]*.jar --version
+          RUNTIME_JAR="$(find release-assets -maxdepth 1 -type f -name "${RELEASE_ARTIFACT_ID}-[0-9]*.jar" ! -name "*-sources-*" -print -quit)"
+          test -n "${RUNTIME_JAR}"
+          java -jar "${RUNTIME_JAR}" --version
+          HELP_OUTPUT="$(java -jar "${RUNTIME_JAR}" --help)"
+          grep -F "java -jar $(basename "${RUNTIME_JAR}") <input.md> --out <output.xlsx>" <<< "${HELP_OUTPUT}"
+
+          SUFFIXED_JAR="${RUNNER_TEMP}/${RELEASE_ARTIFACT_ID}-smoke.7.jar"
+          cp "${RUNTIME_JAR}" "${SUFFIXED_JAR}"
+          SUFFIXED_HELP="$(java -jar "${SUFFIXED_JAR}" --help)"
+          grep -F "java -jar $(basename "${SUFFIXED_JAR}") <input.md> --out <output.xlsx>" <<< "${SUFFIXED_HELP}"
 
       - name: Upload CLI runtime jars to GitHub Release
         uses: softprops/action-gh-release@v2

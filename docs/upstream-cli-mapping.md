@@ -17,11 +17,22 @@
 Java command form:
 
 ```sh
-java -jar target/miku-md2xlsx-java-0.9.5.jar <input.md> --out <output.xlsx> [options]
+java -jar miku-md2xlsx-java-0.10.0.jar <input.md> --out <output.xlsx> [options]
 ```
 
 Known differences:
 
+- The Release Asset command is the primary public command. Source-tree
+  `target/` paths are limited to development documentation.
+- Help resolves the actual executable JAR filename, including a dot-suffixed
+  Release Asset name.
+- Zero arguments print help and exit with code 0. Invalid usage exits with
+  code 2, while input/output or conversion failures exit with code 1.
+- Successful conversion writes only the requested `.xlsx` and is silent on
+  stdout. Help and version use stdout; diagnostics use stderr. No `--summary`
+  or other machine-readable terminal output is currently provided.
+- Missing parent directories for `--out` are created, and existing output
+  files are overwritten.
 - Local image references are embedded when the referenced PNG/JPEG/GIF files
   are available relative to the input Markdown file.
 - Remote image URLs are not downloaded.

@@ -128,6 +128,9 @@
   names, table anchors, and malformed-marker diagnostics.
 - Upstream `v0.9.5` and `miku-ms-office-core-java` `0.6.0`, including XML 1.0
   supplementary Unicode and character-boundary regression coverage.
+- Upstream `v0.10.0` Release Asset CLI contract and DEFLATE verification,
+  including actual executable JAR names and local/central ZIP method checks
+  for normal and template-assisted generation.
 
 ## Pending
 
@@ -147,7 +150,7 @@ Run:
 ```sh
 mvn test
 mvn package
-java -jar target/miku-md2xlsx-java-0.9.5.jar --help
-java -jar target/miku-md2xlsx-java-0.9.5.jar --version
-java -jar target/miku-md2xlsx-java-0.9.5.jar src/test/resources/fixtures/from-xlsx2md/xlsx2md-basic-sample01.md --out target/verification-basic.xlsx --input-dialect miku-xlsx2md
+java -jar target/miku-md2xlsx-java-0.10.0.jar --help
+java -jar target/miku-md2xlsx-java-0.10.0.jar --version
+java -jar target/miku-md2xlsx-java-0.10.0.jar src/test/resources/fixtures/from-xlsx2md/xlsx2md-basic-sample01.md --out target/verification-basic.xlsx --input-dialect miku-xlsx2md
 ```

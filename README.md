@@ -26,6 +26,7 @@ representative upstream fixture semantics, image sizing, drawings, hyperlinks,
 merges, styles, and generated workbook XML. Exact Markdown AST compatibility
 with upstream `remark-parse` plus `remark-gfm` is optional future work rather
 than a bounded migration item.
+Generated XLSX package entries use ZIP DEFLATE compression.
 
 ## Requirements
 
@@ -36,25 +37,41 @@ The project source and target compatibility are fixed to Java 1.8.
 
 ## Quick Start
 
+Download `miku-md2xlsx-java-0.10.0.jar` from the GitHub Release, then run:
+
 ```sh
-mvn package
-java -jar target/miku-md2xlsx-java-0.9.5.jar README.md --out README.xlsx
+java -jar miku-md2xlsx-java-0.10.0.jar README.md --out README.xlsx
 ```
 
 ## Command Form
 
 ```sh
-java -jar target/miku-md2xlsx-java-0.9.5.jar <input.md> --out <output.xlsx> [options]
+java -jar miku-md2xlsx-java-0.10.0.jar <input.md> --out <output.xlsx> [options]
 ```
 
 Examples:
 
 ```sh
-java -jar target/miku-md2xlsx-java-0.9.5.jar sample.md --out sample.xlsx
-java -jar target/miku-md2xlsx-java-0.9.5.jar sample.md --out sample.xlsx --template template.xlsx
-java -jar target/miku-md2xlsx-java-0.9.5.jar book.md --out book.xlsx --sheet-mode heading
-java -jar target/miku-md2xlsx-java-0.9.5.jar exported.md --out restored.xlsx --input-dialect miku-xlsx2md
+java -jar miku-md2xlsx-java-0.10.0.jar sample.md --out sample.xlsx
+java -jar miku-md2xlsx-java-0.10.0.jar sample.md --out sample.xlsx --template template.xlsx
+java -jar miku-md2xlsx-java-0.10.0.jar book.md --out book.xlsx --sheet-mode heading
+java -jar miku-md2xlsx-java-0.10.0.jar exported.md --out restored.xlsx --input-dialect miku-xlsx2md
 ```
+
+The CLI reads Markdown as UTF-8, creates missing parent directories for
+`--out`, and overwrites an existing output file. A normal conversion generates
+only the requested `.xlsx` file.
+
+`stdout` is used for `--help` and `--version`; a successful conversion is
+otherwise silent. Usage errors and conversion failures are written to
+`stderr`. The CLI does not currently provide `--summary` or other
+machine-readable terminal output.
+
+Exit codes are:
+
+- `0`: conversion success, `--help`, `--version`, or zero-argument help
+- `1`: input/output or conversion failure
+- `2`: invalid CLI usage, including missing arguments or unknown options
 
 ## Options
 
@@ -111,6 +128,7 @@ mode rejects malformed structural markers and cannot be combined with
 ```sh
 mvn test
 mvn package
+java -jar target/miku-md2xlsx-java-0.10.0.jar --help
 ```
 
 Release assets are built by `.github/workflows/release-cli-runtime.yml` for

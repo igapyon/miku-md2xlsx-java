@@ -5,8 +5,10 @@ import jp.igapyon.mikumsofficecore.OpcContentTypeOverride;
 import jp.igapyon.mikumsofficecore.OpcContentTypes;
 import jp.igapyon.mikumsofficecore.OpcRelationship;
 import jp.igapyon.mikumsofficecore.OpcRelationships;
+import jp.igapyon.mikumsofficecore.ZipCompressionMethod;
 import jp.igapyon.mikumsofficecore.ZipEntryInput;
 import jp.igapyon.mikumsofficecore.ZipPackage;
+import jp.igapyon.mikumsofficecore.ZipWriteOptions;
 
 class XlsxPackageBuilder {
     private static final int IMAGE_PREVIEW_COLUMNS = 3;
@@ -51,7 +53,8 @@ class XlsxPackageBuilder {
                 entries.add(new ZipEntryInput("xl/media/" + image.getMediaPath(), image.getAsset().getData()));
             }
         }
-        return ZipPackage.writeZipPackage(entries);
+        return ZipPackage.writeZipPackage(entries,
+                new ZipWriteOptions().setCompression(ZipCompressionMethod.DEFLATE));
     }
 
     private String contentTypes(int sheetCount, java.util.List<SheetDrawing> drawings,
