@@ -1,5 +1,6 @@
 package jp.igapyon.mikumd2xlsx.cli;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
@@ -67,6 +68,7 @@ public class MikuMd2xlsxCli {
     }
 
     public static String helpText() {
+        String executableName = executableJarName();
         return "miku-md2xlsx " + MikuMd2xlsxCore.VERSION + "\n"
                 + "\n"
                 + "miku-md2xlsx converts a Markdown file into an Excel .xlsx workbook.\n"
@@ -74,19 +76,26 @@ public class MikuMd2xlsxCli {
                 + "the generated workbook is written to the --out path.\n"
                 + "\n"
                 + "Usage:\n"
-                + "  java -jar target/miku-md2xlsx-java-" + MikuMd2xlsxCore.VERSION + ".jar <input.md> --out <output.xlsx> [options]\n"
-                + "  java -jar target/miku-md2xlsx-java-" + MikuMd2xlsxCore.VERSION + ".jar --help\n"
-                + "  java -jar target/miku-md2xlsx-java-" + MikuMd2xlsxCore.VERSION + ".jar --version\n"
+                + "  java -jar " + executableName + " <input.md> --out <output.xlsx> [options]\n"
+                + "  java -jar " + executableName + " --help\n"
+                + "  java -jar " + executableName + " --version\n"
                 + "\n"
                 + "Default behavior:\n"
                 + "  The input file is read as UTF-8 Markdown. The output workbook is written to\n"
-                + "  --out. Parent directories for --out are created when missing.\n"
+                + "  --out. Parent directories for --out are created when missing. Running with\n"
+                + "  no arguments prints this help and exits with code 0.\n"
                 + "\n"
                 + "Inputs:\n"
                 + "  <input.md>                Input Markdown file path\n"
                 + "\n"
                 + "Outputs:\n"
-                + "  --out <file> is the generated Excel .xlsx workbook.\n"
+                + "  stdout  Help and version text. Successful conversion is otherwise silent.\n"
+                + "  stderr  CLI usage errors and conversion or file-system failures.\n"
+                + "  file    --out <file> is the generated Excel .xlsx workbook.\n"
+                + "  No --summary or other machine-readable terminal output is currently provided.\n"
+                + "\n"
+                + "Generated artifacts:\n"
+                + "  A normal conversion generates only the .xlsx file specified by --out.\n"
                 + "\n"
                 + "Overwrite behavior:\n"
                 + "  Existing --out files are overwritten.\n"
@@ -107,9 +116,11 @@ public class MikuMd2xlsxCli {
                 + "  --version                 Show version\n"
                 + "\n"
                 + "Examples:\n"
-                + "  java -jar target/miku-md2xlsx-java-" + MikuMd2xlsxCore.VERSION + ".jar ./sample.md --out ./sample.xlsx\n"
-                + "  java -jar target/miku-md2xlsx-java-" + MikuMd2xlsxCore.VERSION + ".jar ./sample.md --out ./sample.xlsx --sheet-mode heading\n"
-                + "  java -jar target/miku-md2xlsx-java-" + MikuMd2xlsxCore.VERSION + ".jar ./book.md --out ./book.xlsx --sheet-mode heading --sheet-heading-depth 2\n"
+                + "  java -jar " + executableName + " ./sample.md --out ./sample.xlsx\n"
+                + "  java -jar " + executableName + " ./sample.md --out ./sample.xlsx --template ./template.xlsx\n"
+                + "  java -jar " + executableName + " ./book.md --out ./book.xlsx --input-dialect miku-xlsx2md\n"
+                + "  java -jar " + executableName + " ./sample.md --out ./sample.xlsx --sheet-mode heading\n"
+                + "  java -jar " + executableName + " ./book.md --out ./book.xlsx --sheet-mode heading --sheet-heading-depth 2\n"
                 + "\n"
                 + "Markdown handling notes:\n"
                 + "  - Headings, paragraphs, lists, tables, code blocks, horizontal rules,\n"
@@ -142,6 +153,21 @@ public class MikuMd2xlsxCli {
                 + "  - heading: split worksheets at headings matching --sheet-heading-depth.\n"
                 + "  - Use --sheet-heading-depth 2 for miku-xlsx2md-style Markdown where # is\n"
                 + "    the workbook title and ## headings are worksheet names.\n";
+    }
+
+    private static String executableJarName() {
+        try {
+            java.net.URL location = MikuMd2xlsxCli.class.getProtectionDomain().getCodeSource().getLocation();
+            if (location != null && "file".equalsIgnoreCase(location.getProtocol())) {
+                File executable = new File(location.toURI());
+                if (executable.isFile() && executable.getName().endsWith(".jar")) {
+                    return executable.getName();
+                }
+            }
+        } catch (Exception ex) {
+            // Fall back to the canonical release name for classes or unusual class loaders.
+        }
+        return "miku-md2xlsx-java-" + MikuMd2xlsxCore.VERSION + ".jar";
     }
 
     private Md2XlsxOptions.ImageLoader createImageLoader(final Path inputPath) {

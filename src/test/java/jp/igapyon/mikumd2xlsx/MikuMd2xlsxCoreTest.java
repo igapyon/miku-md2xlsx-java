@@ -94,6 +94,7 @@ class MikuMd2xlsxCoreTest {
         assertTrue(xlsx.length > 0);
         assertZipContains(xlsx, "xl/workbook.xml");
         assertZipContains(xlsx, "xl/worksheets/sheet1.xml");
+        assertAllEntriesUseDeflate(xlsx);
     }
 
     @Test
@@ -437,6 +438,15 @@ class MikuMd2xlsxCoreTest {
         assertEquals("- Child", workbook.getSheets().get(0).getRows().get(1).getCells().get(1).getValue());
         assertEquals("1. Ordered", workbook.getSheets().get(0).getRows().get(2).getCells().get(0).getValue());
         assertEquals("2) Paren ordered", workbook.getSheets().get(0).getRows().get(3).getCells().get(0).getValue());
+    }
+
+    @Test
+    void preservesOrderedMarkerForInlineCodeWithContinuationLine() {
+        WorkbookModel workbook = new MikuMd2xlsxCore().markdownToXlsxModel(
+                "1. First ordered item with `code`\n"
+                        + "   continuation line\n");
+        assertEquals("1. First ordered item with code\ncontinuation line",
+                workbook.getSheets().get(0).getRows().get(0).getCells().get(0).getValue());
     }
 
     @Test
@@ -944,6 +954,14 @@ class MikuMd2xlsxCoreTest {
         throw new AssertionError("Missing zip entry: " + expected);
     }
 
+    private void assertAllEntriesUseDeflate(byte[] zipBytes) {
+        XlsxTestSupport.ZipCompressionMethods methods = XlsxTestSupport.readZipCompressionMethods(zipBytes);
+        assertTrue(!methods.getLocal().isEmpty());
+        assertEquals(new java.util.HashSet<Integer>(Arrays.asList(Integer.valueOf(8))),
+                new java.util.HashSet<Integer>(methods.getLocal()));
+        assertEquals(methods.getLocal(), methods.getCentral());
+    }
+
     private String fixture(String name) throws IOException {
         return new String(fixtureBytes(name), StandardCharsets.UTF_8);
     }
@@ -1199,6 +1217,7 @@ class MikuMd2xlsxCoreTest {
         options.setTemplateXlsx(jp.igapyon.mikumsofficecore.ZipPackage.writeZipPackage(templateEntries));
         byte[] output = new MikuMd2xlsxCore().md2xlsx(
                 "# Generated A\n\nBody A\n\n# Generated B\n\nBody B\n\n# Generated C\n\nBody C", options);
+        assertAllEntriesUseDeflate(output);
         Map<String, String> entries = XlsxTestSupport.readWorkbookXmlEntries(output);
         assertTrue(entries.get("xl/styles.xml").contains("TemplateFont"));
         assertTrue(entries.get("xl/theme/theme1.xml").contains("Template Theme"));

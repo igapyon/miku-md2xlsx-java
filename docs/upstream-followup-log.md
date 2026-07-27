@@ -1,5 +1,30 @@
 # Upstream Follow-up Log
 
+## 2026-07-27 Upstream 0.10.0 CLI And DEFLATE Follow-Up
+
+- Compared upstream Node `miku-md2xlsx` from `2b2e79d` (`v0.9.5`) through
+  `2337bd2` (`v0.10.0`).
+- Updated the Java runtime version to `0.10.0`.
+- Aligned help with the actual executable JAR filename so dot-suffixed Release
+  Asset names remain copy-pasteable.
+- Added local-header and central-directory DEFLATE method checks for normal
+  and template-assisted XLSX generation.
+- Strengthened the Java 8 Release Asset smoke test for both the prepared
+  release filename and a copied dot-suffixed filename.
+
+## 2026-07-27 GitHub Issue #6 CLI Contract And Ordered List Parity
+
+- Changed public help and README examples to run the downloaded
+  `miku-md2xlsx-java-0.10.0.jar` Release Asset directly; source-tree `target/`
+  paths remain development-only.
+- Documented zero-argument help, output parent-directory creation, overwrite
+  behavior, generated artifacts, stdout/stderr roles, the absence of
+  machine-readable summary output, and exit codes.
+- Fixed ordered-list marker detection for list items containing continuation
+  lines. An item such as `1. ... \`code\`` followed by an indented continuation
+  now remains numbered instead of being rewritten with `-`.
+- Added focused CLI and core regressions for these contracts.
+
 ## 2026-05-18
 
 - Initialized Java straight-conversion repository from empty local target.

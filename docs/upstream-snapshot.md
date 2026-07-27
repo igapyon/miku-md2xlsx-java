@@ -5,7 +5,7 @@
 - Repository: <https://github.com/igapyon/miku-md2xlsx>
 - Local checkout path used during initialization: `workplace/miku-md2xlsx`
 - Checked commit: `4d4fbd12595cd543ec7140eda0d9eca7d4cb2bbe`
-- Latest follow-up commit checked: `2b2e79d` (`v0.9.5`, 2026-07-18)
+- Latest follow-up commit checked: `2337bd2` (`v0.10.0`, 2026-07-27)
 - Snapshot policy: upstream is not vendored in this repository. Clone or update
   it under `workplace/` when comparing parity.
 

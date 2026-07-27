@@ -218,3 +218,6 @@
 - Followed upstream Node `v0.9.5`: updated the runtime and vendored
   `miku-ms-office-core-java` to `0.6.0`, retaining product-local XLSX XML
   generation and adding explicit XML 1.0 boundary coverage.
+- Followed upstream Node `v0.10.0`: aligned the Release Asset CLI contract,
+  actual executable filename handling, DEFLATE coverage for normal/template
+  output, and runtime version.

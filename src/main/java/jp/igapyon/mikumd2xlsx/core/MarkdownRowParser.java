@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 class MarkdownRowParser {
     private static final Pattern FENCE_START = Pattern.compile("^(`{3,}|~{3,})");
+    private static final Pattern ORDERED_LIST_MARKER = Pattern.compile("^\\d+[.)](?=\\s)");
 
     List<RowModel> parseRows(String markdown, Md2XlsxOptions options) {
         List<RowModel> rows = new ArrayList<RowModel>();
@@ -375,7 +376,8 @@ class MarkdownRowParser {
         }
         int depth = leadingSpaces / 2;
         String trimmed = line.trim();
-        String marker = trimmed.matches("^\\d+[.)]\\s+.*") ? trimmed.replaceFirst("^(\\d+[.)]).*", "$1") : "-";
+        Matcher orderedMarker = ORDERED_LIST_MARKER.matcher(trimmed);
+        String marker = orderedMarker.find() ? orderedMarker.group() : "-";
         String text = trimmed.replaceFirst("^([-*+]\\s+|\\d+[.)]\\s+)", "")
                 .replaceFirst("^\\[[ xX]\\]\\s+", "");
         String value = marker + " " + text;

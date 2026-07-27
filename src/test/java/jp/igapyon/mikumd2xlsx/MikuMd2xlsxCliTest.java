@@ -20,7 +20,7 @@ class MikuMd2xlsxCliTest {
     void printsVersion() {
         CliRun run = runCli("--version");
         assertEquals(0, run.exitCode);
-        assertEquals("0.9.5\n", run.out);
+        assertEquals("0.10.0\n", run.out);
         assertEquals("", run.err);
     }
 
@@ -30,13 +30,20 @@ class MikuMd2xlsxCliTest {
         String help = run.out;
         assertEquals(0, run.exitCode);
         assertEquals("", run.err);
-        assertTrue(help.contains("miku-md2xlsx 0.9.5"));
+        assertTrue(help.contains("miku-md2xlsx 0.10.0"));
         assertTrue(help.contains("miku-md2xlsx converts a Markdown file into an Excel .xlsx workbook."));
         assertTrue(help.contains("Usage:"));
         assertTrue(help.contains("Inputs:"));
         assertTrue(help.contains("Outputs:"));
+        assertTrue(help.contains("Generated artifacts:"));
         assertTrue(help.contains("Overwrite behavior:"));
         assertTrue(help.contains("Exit codes:"));
+        assertTrue(help.contains("stdout  Help and version text."));
+        assertTrue(help.contains("stderr  CLI usage errors and conversion or file-system failures."));
+        assertTrue(help.contains("No --summary or other machine-readable terminal output is currently provided."));
+        assertTrue(help.contains("no arguments prints this help and exits with code 0."));
+        assertTrue(help.contains("java -jar miku-md2xlsx-java-0.10.0.jar"));
+        assertTrue(!help.contains("java -jar target/"));
         assertTrue(help.contains("--out <file>"));
         assertTrue(help.contains("--version"));
         assertTrue(help.contains("Examples:"));
@@ -64,6 +71,18 @@ class MikuMd2xlsxCliTest {
         Files.write(input, "# Title\n\n| A | B |\n|---|---|\n| 1 | 2 |\n".getBytes(StandardCharsets.UTF_8));
         CliRun run = runCli(input.toString(), "--out", output.toString());
         assertEquals(0, run.exitCode);
+        assertEquals("", run.err);
+        assertTrue(Files.size(output) > 0);
+    }
+
+    @Test
+    void createsMissingOutputParentDirectories() throws Exception {
+        Path input = tempDir.resolve("sample.md");
+        Path output = tempDir.resolve("nested/output/sample.xlsx");
+        Files.write(input, "# Title\n".getBytes(StandardCharsets.UTF_8));
+        CliRun run = runCli(input.toString(), "--out", output.toString());
+        assertEquals(0, run.exitCode);
+        assertEquals("", run.out);
         assertEquals("", run.err);
         assertTrue(Files.size(output) > 0);
     }

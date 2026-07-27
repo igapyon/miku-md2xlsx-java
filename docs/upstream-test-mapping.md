@@ -4,7 +4,7 @@
 | --- | --- | --- |
 | Core Markdown to workbook conversion | `MikuMd2xlsxCoreTest.convertsMarkdownToWorkbookModel` | Initial smoke coverage |
 | Heading sheet split | `MikuMd2xlsxCoreTest.supportsHeadingSheetMode` | Initial smoke coverage |
-| XLSX package generation | `MikuMd2xlsxCoreTest.writesXlsxZipEntries` | Initial zip-entry coverage |
+| XLSX package generation and local/central DEFLATE methods | `MikuMd2xlsxCoreTest.writesXlsxZipEntries` | Covered |
 | Small table fixture parity | `MikuMd2xlsxCoreTest.convertsSmallUpstreamTableFixture` | Initial fixture coverage |
 | Upstream smoke fixture group | `MikuMd2xlsxCoreTest.convertsUpstreamSmokeFixtureGroup` | Covered |
 | Image basic fixture with assets | `MikuMd2xlsxCoreTest.convertsUpstreamImageBasicFixtureWithAssets` | Covered |
@@ -36,7 +36,7 @@
 | XML escaping and inline text `xml:space` behavior | `MikuMd2xlsxCoreTest.followsUpstreamXmlEscapingAndInlineTextRules` | Covered |
 | Column names beyond `Z` | `MikuMd2xlsxCoreTest.writesColumnNamesBeyondZLikeUpstream` | Covered |
 | Supplementary Unicode and XML 1.0 character boundaries in worksheet text | `MikuMd2xlsxCoreTest.preservesSupplementaryUnicodeCharactersInWorksheetText` | Covered |
-| XLSX template styles, theme, namespaces, cell styles, and rightmost-sheet reuse | `MikuMd2xlsxCoreTest.reusesTemplateStylesThemeAndRightmostSheet` | Covered |
+| XLSX template styles, theme, namespaces, cell styles, rightmost-sheet reuse, and local/central DEFLATE methods | `MikuMd2xlsxCoreTest.reusesTemplateStylesThemeAndRightmostSheet` | Covered |
 | miku-xlsx2md dialect sheet names and table anchors | `MikuMd2xlsxCoreTest.restoresXlsx2mdSheetNamesAndAnchoredTables` | Covered |
 | malformed miku-xlsx2md structural markers | `MikuMd2xlsxCoreTest.rejectsMalformedXlsx2mdMarkers` | Covered |
 | Style indexes and styles XML shape | `MikuMd2xlsxCoreTest.writesUpstreamStyleIndexesAndStyleSheetShape` | Covered |
@@ -48,6 +48,7 @@
 | Heading mode title fallback without split | `MikuMd2xlsxCoreTest.usesTitleOptionWhenHeadingModeDoesNotSplit` | Covered |
 | Blank row before heading | `MikuMd2xlsxCoreTest.insertsBlankBeforeHeadingAfterText` | Covered |
 | List marker and nesting | `MikuMd2xlsxCoreTest.preservesListMarkersAndNestedDepth` | Covered |
+| Ordered list item with inline code and a continuation line | `MikuMd2xlsxCoreTest.preservesOrderedMarkerForInlineCodeWithContinuationLine` | Covered |
 | List lazy continuation | `MikuMd2xlsxCoreTest.parsesListLazyContinuationLikeRemarkParse` | Covered |
 | Link definition blocks | `MikuMd2xlsxCoreTest.skipsLinkDefinitionsLikeRemarkParse` | Covered |
 | GFM task list checkbox text | `MikuMd2xlsxCoreTest.stripsGfmTaskListCheckboxesLikeRemarkGfm` | Covered |
@@ -77,6 +78,7 @@
 | CLI `--help` | `MikuMd2xlsxCliTest.printsHelp` | Covered |
 | CLI zero-argument help | `MikuMd2xlsxCliTest.printsHelpWhenNoArguments` | Covered |
 | CLI file conversion | `MikuMd2xlsxCliTest.convertsFile` | Covered |
+| CLI output parent-directory creation | `MikuMd2xlsxCliTest.createsMissingOutputParentDirectories` | Covered |
 | CLI validation errors | `MikuMd2xlsxCliTest` validation methods | Covered |
 | CLI runtime I/O errors | `MikuMd2xlsxCliTest.reportsRuntimeIoErrors` | Covered |
 | CLI input dialect validation and generic sheet-option exclusion | `MikuMd2xlsxCliTest.rejectsInvalidInputDialect`, `rejectsGenericSheetOptionsWithXlsx2mdDialect` | Covered |
